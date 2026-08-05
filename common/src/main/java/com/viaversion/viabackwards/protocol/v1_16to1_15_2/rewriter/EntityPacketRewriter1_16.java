@@ -20,6 +20,7 @@ package com.viaversion.viabackwards.protocol.v1_16to1_15_2.rewriter;
 import com.viaversion.viabackwards.api.rewriters.EntityRewriter;
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.Protocol1_16To1_15_2;
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.PlayerAttributesStorage;
+import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.ProtocolStorables1_16;
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.WolfDataMaskStorage;
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.WorldNameTracker;
 import com.viaversion.viaversion.api.Via;
@@ -99,8 +100,9 @@ public class EntityPacketRewriter1_16 extends EntityRewriter<ClientboundPackets1
             public void register() {
                 map(dimensionTransformer); // Dimension Type
                 handler(wrapper -> {
+                    ProtocolStorables1_16 storables = wrapper.user().storables(protocol);
                     // Grab the tracker for world names
-                    WorldNameTracker worldNameTracker = wrapper.user().get(WorldNameTracker.class);
+                    WorldNameTracker worldNameTracker = storables.worldNameTracker();
                     String nextWorldName = wrapper.read(Types.STRING); // World Name
 
                     wrapper.passthrough(Types.LONG); // Seed
@@ -108,7 +110,7 @@ public class EntityPacketRewriter1_16 extends EntityRewriter<ClientboundPackets1
                     wrapper.read(Types.BYTE); // Previous gamemode
 
                     // Grab client world
-                    ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_16To1_15_2.class);
+                    ClientWorld clientWorld = storables.clientWorld();
                     int dimension = wrapper.get(Types.INT, 0);
 
                     // Send a dummy respawn with a different dimension if the world name was different and the same dimension was used
@@ -134,7 +136,7 @@ public class EntityPacketRewriter1_16 extends EntityRewriter<ClientboundPackets1
                         wrapper.set(Types.STRING, 0, "flat");
                     }
 
-                    final PlayerAttributesStorage attributes = wrapper.user().get(PlayerAttributesStorage.class);
+                    final PlayerAttributesStorage attributes = storables.playerAttributesStorage();
                     final boolean keepPlayerAttributes = wrapper.read(Types.BOOLEAN);
                     if (keepPlayerAttributes) {
                         // Ensure packet order
@@ -161,13 +163,13 @@ public class EntityPacketRewriter1_16 extends EntityRewriter<ClientboundPackets1
                 read(Types.NAMED_COMPOUND_TAG); // whatever this is
                 map(dimensionTransformer); // Dimension Type
                 handler(wrapper -> {
-                    WorldNameTracker worldNameTracker = wrapper.user().get(WorldNameTracker.class);
-                    worldNameTracker.setWorldName(wrapper.read(Types.STRING)); // Save the world name
+                    ProtocolStorables1_16 storables = wrapper.user().storables(protocol);
+                    storables.worldNameTracker().setWorldName(wrapper.read(Types.STRING)); // Save the world name
                 });
                 map(Types.LONG); // Seed
                 map(Types.UNSIGNED_BYTE); // Max players
                 handler(wrapper -> {
-                    ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_16To1_15_2.class);
+                    ClientWorld clientWorld = wrapper.user().storables(protocol).clientWorld();
                     clientWorld.setEnvironment(wrapper.get(Types.INT, 1));
 
                     wrapper.write(Types.STRING, "default"); // Level type
@@ -192,7 +194,8 @@ public class EntityPacketRewriter1_16 extends EntityRewriter<ClientboundPackets1
         registerSetEntityData(ClientboundPackets1_16.SET_ENTITY_DATA, Types1_16.ENTITY_DATA_LIST, Types1_14.ENTITY_DATA_LIST);
 
         protocol.registerClientbound(ClientboundPackets1_16.UPDATE_ATTRIBUTES, wrapper -> {
-            final PlayerAttributesStorage attributes = wrapper.user().get(PlayerAttributesStorage.class);
+            ProtocolStorables1_16 storables = wrapper.user().storables(protocol);
+            final PlayerAttributesStorage attributes = storables.playerAttributesStorage();
 
             final int entityId = wrapper.passthrough(Types.VAR_INT);
 

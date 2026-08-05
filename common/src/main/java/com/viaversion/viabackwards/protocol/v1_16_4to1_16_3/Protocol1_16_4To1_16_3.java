@@ -19,9 +19,11 @@ package com.viaversion.viabackwards.protocol.v1_16_4to1_16_3;
 
 import com.viaversion.viabackwards.api.BackwardsProtocol;
 import com.viaversion.viabackwards.protocol.v1_16_4to1_16_3.storage.PlayerHandStorage;
+import com.viaversion.viabackwards.protocol.v1_16_4to1_16_3.storage.ProtocolStorables1_16_4;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.type.Types;
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 import com.viaversion.viaversion.protocols.v1_16_1to1_16_2.packet.ClientboundPackets1_16_2;
 import com.viaversion.viaversion.protocols.v1_16_1to1_16_2.packet.ServerboundPackets1_16_2;
 
@@ -43,7 +45,8 @@ public class Protocol1_16_4To1_16_3 extends BackwardsProtocol<ClientboundPackets
                     if (slot == 1) {
                         wrapper.write(Types.VAR_INT, 40); // offhand
                     } else {
-                        wrapper.write(Types.VAR_INT, wrapper.user().get(PlayerHandStorage.class).getCurrentHand());
+                        ProtocolStorables1_16_4 storables = wrapper.user().storables(Protocol1_16_4To1_16_3.this);
+                        wrapper.write(Types.VAR_INT, storables.playerHandStorage().getCurrentHand());
                     }
                 });
             }
@@ -51,12 +54,17 @@ public class Protocol1_16_4To1_16_3 extends BackwardsProtocol<ClientboundPackets
 
         registerServerbound(ServerboundPackets1_16_2.SET_CARRIED_ITEM, wrapper -> {
             short slot = wrapper.passthrough(Types.SHORT);
-            wrapper.user().get(PlayerHandStorage.class).setCurrentHand(slot);
+            ProtocolStorables1_16_4 storables = wrapper.user().storables(this);
+            storables.playerHandStorage().setCurrentHand(slot);
         });
     }
 
     @Override
     public void init(UserConnection user) {
-        user.put(new PlayerHandStorage());
+    }
+
+    @Override
+    public ProtocolStorablesBase createStorables() {
+        return new ProtocolStorables1_16_4();
     }
 }

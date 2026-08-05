@@ -25,11 +25,8 @@ import com.viaversion.viabackwards.protocol.v1_21_2to1_21.rewriter.BlockItemPack
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.rewriter.ComponentRewriter1_21_2;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.rewriter.EntityPacketRewriter1_21_2;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.rewriter.ParticleRewriter1_21_2;
-import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.InventoryStateIdStorage;
-import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.ItemTagStorage;
-import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.PlayerStorage;
+import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.BackwardsStorables1_21_2;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.RecipeStorage;
-import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.SignStorage;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.entities.EntityTypes1_20_5;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
@@ -117,7 +114,8 @@ public final class Protocol1_21_2To1_21 extends BackwardsProtocol<ClientboundPac
     private void storeTags(final PacketWrapper wrapper) {
         tagRewriter.handleGeneric(wrapper);
         wrapper.resetReader();
-        wrapper.user().get(ItemTagStorage.class).readItemTags(wrapper);
+        final BackwardsStorables1_21_2 storables = wrapper.user().storables(this);
+        storables.itemTagStorage().readItemTags(wrapper);
     }
 
     private void clientInformation(final PacketWrapper wrapper) {
@@ -135,11 +133,14 @@ public final class Protocol1_21_2To1_21 extends BackwardsProtocol<ClientboundPac
     @Override
     public void init(final UserConnection user) {
         addEntityTracker(user, new EntityTrackerBase(user, EntityTypes1_20_5.PLAYER));
-        user.put(new InventoryStateIdStorage());
-        user.put(new ItemTagStorage());
-        user.put(new RecipeStorage(this));
-        user.put(new PlayerStorage());
-        user.put(new SignStorage());
+        final BackwardsStorables1_21_2 storables = user.storables(this);
+        storables.setRecipeStorage(new RecipeStorage(this));
+        user.put(storables.playerStorage());
+    }
+
+    @Override
+    public BackwardsStorables1_21_2 createStorables() {
+        return new BackwardsStorables1_21_2();
     }
 
     @Override

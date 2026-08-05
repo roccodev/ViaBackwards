@@ -15,17 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.viaversion.viabackwards.protocol.v1_16_4to1_16_3.storage;
+package com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage;
 
-public class PlayerHandStorage {
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 
-    private int currentHand;
+public final class ProtocolStorables1_16 extends ProtocolStorablesBase {
 
-    public int getCurrentHand() {
-        return currentHand;
+    private final PlayerSneakStorage playerSneakStorage = new PlayerSneakStorage();
+    private final WorldNameTracker worldNameTracker = new WorldNameTracker();
+    private final PlayerAttributesStorage playerAttributesStorage = new PlayerAttributesStorage();
+
+    public PlayerSneakStorage playerSneakStorage() {
+        return playerSneakStorage;
     }
 
-    public void setCurrentHand(int currentHand) {
-        this.currentHand = currentHand;
+    public WorldNameTracker worldNameTracker() {
+        return worldNameTracker;
+    }
+
+    public PlayerAttributesStorage playerAttributesStorage() {
+        return playerAttributesStorage;
     }
 }

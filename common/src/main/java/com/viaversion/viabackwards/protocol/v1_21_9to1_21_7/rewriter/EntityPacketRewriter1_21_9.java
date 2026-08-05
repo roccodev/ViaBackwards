@@ -24,6 +24,7 @@ import com.viaversion.viabackwards.api.rewriters.EntityRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.Protocol1_21_9To1_21_7;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.MannequinData;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.PlayerRotationStorage;
+import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.ProtocolStorables1_21_9;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.tracker.EntityTracker1_21_9;
 import com.viaversion.viabackwards.utils.VelocityUtil;
 import com.viaversion.viaversion.api.connection.UserConnection;
@@ -46,7 +47,6 @@ import com.viaversion.viaversion.protocols.v1_21_5to1_21_6.packet.ClientboundPac
 import com.viaversion.viaversion.protocols.v1_21_5to1_21_6.packet.ServerboundPackets1_21_6;
 import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ClientboundPacket1_21_9;
 import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ClientboundPackets1_21_9;
-import com.viaversion.viaversion.protocols.v1_21to1_21_2.storage.BundleStateTracker;
 import com.viaversion.viaversion.rewriter.entitydata.EntityDataHandler;
 import com.viaversion.viaversion.util.ChatColorUtil;
 import com.viaversion.viaversion.util.Copyable;
@@ -164,7 +164,8 @@ public final class EntityPacketRewriter1_21_9 extends EntityRewriter<Clientbound
         });
 
         protocol.registerClientbound(ClientboundPackets1_21_9.PLAYER_ROTATION, wrapper -> {
-            final PlayerRotationStorage storage = wrapper.user().get(PlayerRotationStorage.class);
+            final ProtocolStorables1_21_9 storables = wrapper.user().storables(protocol);
+            final PlayerRotationStorage storage = storables.playerRotationStorage();
 
             float yRot = wrapper.read(Types.FLOAT);
             if (wrapper.read(Types.BOOLEAN)) {
@@ -333,7 +334,8 @@ public final class EntityPacketRewriter1_21_9 extends EntityRewriter<Clientbound
         final float yaw = wrapper.passthrough(Types.FLOAT);
         final float pitch = wrapper.passthrough(Types.FLOAT);
 
-        wrapper.user().get(PlayerRotationStorage.class).setRotation(yaw, pitch);
+        final ProtocolStorables1_21_9 storables = wrapper.user().storables(protocol);
+        storables.playerRotationStorage().setRotation(yaw, pitch);
     }
 
     @Override
@@ -387,7 +389,8 @@ public final class EntityPacketRewriter1_21_9 extends EntityRewriter<Clientbound
                 mannequinData.setDisplayName(displayName);
                 sendPlayerInfoDisplayNameUpdate(event.user(), mannequinData, displayName);
             } else if (event.index() == 17) { // Profile
-                final boolean isBundling = event.user().get(BundleStateTracker.class).isBundling();
+                ProtocolStorables1_21_9 storables = event.user().storables(protocol);
+                final boolean isBundling = storables.bundleStateTracker().isBundling();
                 if (!isBundling) {
                     final PacketWrapper bundleStart = PacketWrapper.create(ClientboundPackets1_21_6.BUNDLE_DELIMITER, event.user());
                     bundleStart.send(Protocol1_21_9To1_21_7.class);

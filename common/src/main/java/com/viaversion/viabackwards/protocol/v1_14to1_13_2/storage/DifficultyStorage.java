@@ -17,9 +17,7 @@
  */
 package com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
-
-public class DifficultyStorage implements StorableObject {
+public class DifficultyStorage {
     private byte difficulty;
 
     public byte getDifficulty() {

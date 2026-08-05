@@ -23,9 +23,7 @@ import com.viaversion.viabackwards.protocol.v1_16to1_15_2.rewriter.BlockItemPack
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.rewriter.CommandRewriter1_16;
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.rewriter.EntityPacketRewriter1_16;
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.rewriter.TranslatableRewriter1_16;
-import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.PlayerAttributesStorage;
-import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.PlayerSneakStorage;
-import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.WorldNameTracker;
+import com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage.ProtocolStorables1_16;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.ClientWorld;
 import com.viaversion.viaversion.api.minecraft.RegistryType;
@@ -117,9 +115,11 @@ public class Protocol1_16To1_15_2 extends BackwardsProtocol<ClientboundPackets1_
             wrapper.passthrough(Types.VAR_INT); // player id
             int action = wrapper.passthrough(Types.VAR_INT);
             if (action == 0) {
-                wrapper.user().get(PlayerSneakStorage.class).setSneaking(true);
+                ProtocolStorables1_16 storables = wrapper.user().storables(this);
+                storables.playerSneakStorage().setSneaking(true);
             } else if (action == 1) {
-                wrapper.user().get(PlayerSneakStorage.class).setSneaking(false);
+                ProtocolStorables1_16 storables = wrapper.user().storables(this);
+                storables.playerSneakStorage().setSneaking(false);
             }
         });
 
@@ -138,7 +138,8 @@ public class Protocol1_16To1_15_2 extends BackwardsProtocol<ClientboundPackets1_
             }
 
             // New boolean: Whether the client is sneaking
-            wrapper.write(Types.BOOLEAN, wrapper.user().get(PlayerSneakStorage.class).isSneaking());
+            ProtocolStorables1_16 storables = wrapper.user().storables(this);
+            wrapper.write(Types.BOOLEAN, storables.playerSneakStorage().isSneaking());
         });
 
         registerServerbound(ServerboundPackets1_14.PLAYER_ABILITIES, wrapper -> {
@@ -155,12 +156,13 @@ public class Protocol1_16To1_15_2 extends BackwardsProtocol<ClientboundPackets1_
 
     @Override
     public void init(UserConnection user) {
-        user.addEntityTracker(this.getClass(), new EntityTrackerBase(user, EntityTypes1_16.PLAYER));
-        user.addClientWorld(this.getClass(), new ClientWorld());
+        addEntityTracker(user, new EntityTrackerBase(user, EntityTypes1_16.PLAYER));
+        user.storables(this).setClientWorld(new ClientWorld());
+    }
 
-        user.put(new PlayerSneakStorage());
-        user.put(new WorldNameTracker());
-        user.put(new PlayerAttributesStorage());
+    @Override
+    public ProtocolStorables1_16 createStorables() {
+        return new ProtocolStorables1_16();
     }
 
     @Override

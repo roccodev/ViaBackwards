@@ -24,9 +24,8 @@ import com.viaversion.viabackwards.protocol.v1_13to1_12_2.Protocol1_13To1_12_2;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.data.EntityIdMappings1_12_2;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.data.PaintingNames1_13;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.data.ParticleIdMappings1_12_2;
-import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.BackwardsBlockStorage;
-import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.NoteBlockStorage;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.PlayerPositionStorage1_13;
+import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.ProtocolStorables1_13;
 import com.viaversion.viaversion.api.minecraft.ClientWorld;
 import com.viaversion.viaversion.api.minecraft.Particle;
 import com.viaversion.viaversion.api.minecraft.entities.EntityType;
@@ -64,7 +63,8 @@ public class EntityPacketRewriter1_13 extends LegacyEntityRewriter<ClientboundPa
                 handler(wrapper -> {
                     if (!ViaBackwards.getConfig().isFix1_13FacePlayer()) return;
 
-                    PlayerPositionStorage1_13 playerStorage = wrapper.user().get(PlayerPositionStorage1_13.class);
+                    ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+                    PlayerPositionStorage1_13 playerStorage = storables.playerPositionStorage();
                     byte bitField = wrapper.get(Types.BYTE, 0);
                     playerStorage.setX(toSet(bitField, 0, playerStorage.x(), wrapper.get(Types.DOUBLE, 0)));
                     playerStorage.setY(toSet(bitField, 1, playerStorage.y(), wrapper.get(Types.DOUBLE, 1)));
@@ -196,13 +196,14 @@ public class EntityPacketRewriter1_13 extends LegacyEntityRewriter<ClientboundPa
                 map(Types.INT); // 0 - Dimension ID
 
                 handler(wrapper -> {
-                    ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_13To1_12_2.class);
+                    ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+                    ClientWorld clientWorld = storables.clientWorld();
                     int dimensionId = wrapper.get(Types.INT, 0);
 
                     if (clientWorld.setEnvironment(dimensionId)) {
                         tracker(wrapper.user()).clearEntities();
-                        wrapper.user().get(BackwardsBlockStorage.class).clear();
-                        wrapper.user().get(NoteBlockStorage.class).clear();
+                        storables.backwardsBlockStorage().clear();
+                        storables.noteBlockStorage().clear();
                     }
                 });
             }
@@ -223,7 +224,8 @@ public class EntityPacketRewriter1_13 extends LegacyEntityRewriter<ClientboundPa
             final double y = wrapper.read(Types.DOUBLE);
             final double z = wrapper.read(Types.DOUBLE);
 
-            PlayerPositionStorage1_13 positionStorage = wrapper.user().get(PlayerPositionStorage1_13.class);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            PlayerPositionStorage1_13 positionStorage = storables.playerPositionStorage();
 
             // Send teleport packet to client
             PacketWrapper positionAndLook = wrapper.create(ClientboundPackets1_12_1.PLAYER_POSITION);
@@ -248,7 +250,8 @@ public class EntityPacketRewriter1_13 extends LegacyEntityRewriter<ClientboundPa
             final double x = wrapper.passthrough(Types.DOUBLE);
             final double y = wrapper.passthrough(Types.DOUBLE);
             final double z = wrapper.passthrough(Types.DOUBLE);
-            wrapper.user().get(PlayerPositionStorage1_13.class).setPosition(x, y, z);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            storables.playerPositionStorage().setPosition(x, y, z);
         };
         protocol.registerServerbound(ServerboundPackets1_12_1.MOVE_PLAYER_POS, movementRemapper); // Player Position
         protocol.registerServerbound(ServerboundPackets1_12_1.MOVE_PLAYER_POS_ROT, movementRemapper); // Player Position And Look (serverbound)

@@ -17,15 +17,13 @@
  */
 package com.viaversion.viabackwards.protocol.v1_16_4to1_16_3.storage;
 
-public class PlayerHandStorage {
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 
-    private int currentHand;
+public final class ProtocolStorables1_16_4 extends ProtocolStorablesBase {
 
-    public int getCurrentHand() {
-        return currentHand;
-    }
+    private final PlayerHandStorage playerHandStorage = new PlayerHandStorage();
 
-    public void setCurrentHand(int currentHand) {
-        this.currentHand = currentHand;
+    public PlayerHandStorage playerHandStorage() {
+        return playerHandStorage;
     }
 }

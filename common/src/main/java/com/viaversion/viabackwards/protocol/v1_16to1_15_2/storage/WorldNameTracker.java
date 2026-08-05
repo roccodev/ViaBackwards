@@ -17,9 +17,7 @@
  */
 package com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
-
-public class WorldNameTracker implements StorableObject {
+public class WorldNameTracker {
     private String worldName;
 
     public String getWorldName() {

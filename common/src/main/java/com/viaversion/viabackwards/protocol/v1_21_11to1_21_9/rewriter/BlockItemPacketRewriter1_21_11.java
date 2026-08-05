@@ -23,7 +23,7 @@ import com.viaversion.nbt.tag.StringTag;
 import com.viaversion.nbt.tag.Tag;
 import com.viaversion.viabackwards.api.rewriters.BackwardsStructuredItemRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.Protocol1_21_11To1_21_9;
-import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.storage.GameTimeStorage;
+import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.storage.ProtocolStorables1_21_11;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.Holder;
 import com.viaversion.viaversion.api.minecraft.SoundEvent;
@@ -69,10 +69,12 @@ public final class BlockItemPacketRewriter1_21_11 extends BackwardsStructuredIte
         });
         protocol.registerClientbound(ClientboundPackets1_21_11.SET_TIME, wrapper -> {
             final long gameTime = wrapper.passthrough(Types.LONG);
-            wrapper.user().get(GameTimeStorage.class).setGameTime(gameTime);
+            final ProtocolStorables1_21_11 storables = wrapper.user().storables(protocol);
+            storables.gameTimeStorage().setGameTime(gameTime);
         });
         protocol.registerServerbound(ServerboundPackets1_21_6.CLIENT_TICK_END, wrapper -> {
-            wrapper.user().get(GameTimeStorage.class).incrementGameTime();
+            final ProtocolStorables1_21_11 storables = wrapper.user().storables(protocol);
+            storables.gameTimeStorage().incrementGameTime();
         });
     }
 

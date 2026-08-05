@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.viaversion.viabackwards.ViaBackwards;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.Protocol1_13To1_12_2;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.data.ParticleIdMappings1_12_2;
+import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.ProtocolStorables1_13;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.TabCompleteStorage;
 import com.viaversion.viabackwards.utils.ChatUtil;
 import com.viaversion.viaversion.api.Via;
@@ -142,7 +143,8 @@ public class PlayerPacketRewriter1_13 extends RewriterBase<Protocol1_13To1_12_2>
             @Override
             public void register() {
                 handler(packetWrapper -> {
-                    TabCompleteStorage storage = packetWrapper.user().get(TabCompleteStorage.class);
+                    ProtocolStorables1_13 storables = packetWrapper.user().storables(protocol);
+                    TabCompleteStorage storage = storables.tabCompleteStorage();
                     int action = packetWrapper.passthrough(Types.VAR_INT);
                     int nPlayers = packetWrapper.passthrough(Types.VAR_INT);
                     for (int i = 0; i < nPlayers; i++) {
@@ -236,7 +238,8 @@ public class PlayerPacketRewriter1_13 extends RewriterBase<Protocol1_13To1_12_2>
         protocol.registerClientbound(ClientboundPackets1_13.COMMANDS, null, wrapper -> {
             wrapper.cancel();
 
-            TabCompleteStorage storage = wrapper.user().get(TabCompleteStorage.class);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            TabCompleteStorage storage = storables.tabCompleteStorage();
 
             if (!storage.commands().isEmpty()) {
                 storage.commands().clear();
@@ -274,7 +277,8 @@ public class PlayerPacketRewriter1_13 extends RewriterBase<Protocol1_13To1_12_2>
         });
 
         protocol.registerClientbound(ClientboundPackets1_13.COMMAND_SUGGESTIONS, wrapper -> {
-            TabCompleteStorage storage = wrapper.user().get(TabCompleteStorage.class);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            TabCompleteStorage storage = storables.tabCompleteStorage();
             if (storage.lastRequest() == null) {
                 wrapper.cancel();
                 return;
@@ -299,7 +303,8 @@ public class PlayerPacketRewriter1_13 extends RewriterBase<Protocol1_13To1_12_2>
         });
 
         protocol.registerServerbound(ServerboundPackets1_12_1.COMMAND_SUGGESTION, wrapper -> {
-            TabCompleteStorage storage = wrapper.user().get(TabCompleteStorage.class);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            TabCompleteStorage storage = storables.tabCompleteStorage();
             List<String> suggestions = new ArrayList<>();
 
             String command = wrapper.read(Types.STRING);

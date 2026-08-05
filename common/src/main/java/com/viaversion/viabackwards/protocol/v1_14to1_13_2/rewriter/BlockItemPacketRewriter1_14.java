@@ -27,6 +27,7 @@ import com.viaversion.viabackwards.api.rewriters.EnchantmentRewriter;
 import com.viaversion.viabackwards.item.DataItemWithExtras;
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.Protocol1_14To1_13_2;
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ChunkLightStorage;
+import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ProtocolStorables1_14;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.ClientWorld;
@@ -221,7 +222,7 @@ public class BlockItemPacketRewriter1_14 extends BackwardsItemRewriter<Clientbou
 
                 handler(wrapper -> {
                     int entityId = wrapper.get(Types.VAR_INT, 0);
-                    EntityType entityType = wrapper.user().getEntityTracker(Protocol1_14To1_13_2.class).entityType(entityId);
+                    EntityType entityType = wrapper.user().getEntityTracker(protocol).entityType(entityId);
                     if (entityType == null) return;
 
                     if (entityType.isOrHasParent(EntityTypes1_14.ABSTRACT_HORSE)) {
@@ -347,11 +348,12 @@ public class BlockItemPacketRewriter1_14 extends BackwardsItemRewriter<Clientbou
         });
 
         protocol.registerClientbound(ClientboundPackets1_14.LEVEL_CHUNK, wrapper -> {
-            ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_14To1_13_2.class);
+            ProtocolStorables1_14 storables = wrapper.user().storables(protocol);
+            ClientWorld clientWorld = storables.clientWorld();
             Chunk chunk = wrapper.read(ChunkType1_14.TYPE);
             wrapper.write(ChunkType1_13.forEnvironment(clientWorld.getEnvironment()), chunk);
 
-            ChunkLightStorage.ChunkLight chunkLight = wrapper.user().get(ChunkLightStorage.class).getStoredLight(chunk.getX(), chunk.getZ());
+            ChunkLightStorage.ChunkLight chunkLight = storables.chunkLightStorage().getStoredLight(chunk.getX(), chunk.getZ());
             for (int i = 0; i < chunk.getSections().length; i++) {
                 ChunkSection section = chunk.getSections()[i];
                 if (section == null) continue;
@@ -391,7 +393,8 @@ public class BlockItemPacketRewriter1_14 extends BackwardsItemRewriter<Clientbou
         protocol.registerClientbound(ClientboundPackets1_14.FORGET_LEVEL_CHUNK, wrapper -> {
             int x = wrapper.passthrough(Types.INT);
             int z = wrapper.passthrough(Types.INT);
-            wrapper.user().get(ChunkLightStorage.class).unloadChunk(x, z);
+            ProtocolStorables1_14 storables = wrapper.user().storables(protocol);
+            storables.chunkLightStorage().unloadChunk(x, z);
         });
 
         protocol.replaceClientbound(ClientboundPackets1_14.LEVEL_EVENT, new PacketHandlers() {

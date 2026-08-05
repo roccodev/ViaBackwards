@@ -17,13 +17,12 @@
  */
 package com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.minecraft.BlockPosition;
 import com.viaversion.viaversion.libs.fastutil.objects.Object2IntMap;
 import com.viaversion.viaversion.libs.fastutil.objects.Object2IntOpenHashMap;
 import com.viaversion.viaversion.util.Pair;
 
-public class NoteBlockStorage implements StorableObject {
+public class NoteBlockStorage {
 
     private static final int MAX_NOTE_ID = 24;
 

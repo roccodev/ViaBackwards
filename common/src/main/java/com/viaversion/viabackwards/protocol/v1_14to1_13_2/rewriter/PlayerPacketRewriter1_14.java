@@ -18,7 +18,7 @@
 package com.viaversion.viabackwards.protocol.v1_14to1_13_2.rewriter;
 
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.Protocol1_14To1_13_2;
-import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.DifficultyStorage;
+import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ProtocolStorables1_14;
 import com.viaversion.viaversion.api.minecraft.BlockPosition;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
 import com.viaversion.viaversion.api.rewriter.RewriterBase;
@@ -41,7 +41,8 @@ public class PlayerPacketRewriter1_14 extends RewriterBase<Protocol1_14To1_13_2>
                 read(Types.BOOLEAN); // Locked
                 handler(wrapper -> {
                     byte difficulty = wrapper.get(Types.UNSIGNED_BYTE, 0).byteValue();
-                    wrapper.user().get(DifficultyStorage.class).setDifficulty(difficulty);
+                    ProtocolStorables1_14 storables = wrapper.user().storables(protocol);
+                    storables.difficultyStorage().setDifficulty(difficulty);
                 });
             }
         });

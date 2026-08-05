@@ -19,7 +19,7 @@ package com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.rewriter;
 
 import com.viaversion.viabackwards.api.rewriters.EntityRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.Protocol1_21_11To1_21_9;
-import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.storage.GameTimeStorage;
+import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.storage.ProtocolStorables1_21_11;
 import com.viaversion.viaversion.api.minecraft.entities.EntityType;
 import com.viaversion.viaversion.api.minecraft.entities.EntityTypes1_21_11;
 import com.viaversion.viaversion.api.minecraft.entitydata.EntityData;
@@ -92,7 +92,8 @@ public final class EntityPacketRewriter1_21_11 extends EntityRewriter<Clientboun
     }
 
     private void absoluteToRelativeTicks(final EntityDataHandlerEvent event, final EntityData data) {
-        final long currentGameTime = event.user().get(GameTimeStorage.class).gameTime();
+        final ProtocolStorables1_21_11 storables = event.user().storables(protocol);
+        final long currentGameTime = storables.gameTimeStorage().gameTime();
         final long angerEndTime = data.value();
         final int angerEndIn = (int) MathUtil.clamp(angerEndTime - currentGameTime, Integer.MIN_VALUE, Integer.MAX_VALUE);
         data.setTypeAndValue(VersionedTypes.V1_21_9.entityDataTypes.varIntType, Math.max(angerEndIn, 0));

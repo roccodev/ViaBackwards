@@ -21,9 +21,8 @@ import com.viaversion.viabackwards.api.entities.storage.EntityPositionHandler;
 import com.viaversion.viabackwards.api.entities.storage.EntityReplacement;
 import com.viaversion.viabackwards.api.rewriters.LegacyEntityRewriter;
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.Protocol1_14To1_13_2;
-import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ChunkLightStorage;
-import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.DifficultyStorage;
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.EntityPositionStorage1_14;
+import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ProtocolStorables1_14;
 import com.viaversion.viaversion.api.data.entity.EntityTracker;
 import com.viaversion.viaversion.api.data.entity.TrackedEntity;
 import com.viaversion.viaversion.api.minecraft.BlockPosition;
@@ -316,7 +315,8 @@ public class EntityPacketRewriter1_14 extends LegacyEntityRewriter<ClientboundPa
                 handler(getDimensionHandler(1));
                 handler(playerTrackerHandler());
                 handler(wrapper -> {
-                    short difficulty = wrapper.user().get(DifficultyStorage.class).getDifficulty();
+                    ProtocolStorables1_14 storables = wrapper.user().storables(protocol);
+                    short difficulty = storables.difficultyStorage().getDifficulty();
                     wrapper.write(Types.UNSIGNED_BYTE, difficulty);
 
                     wrapper.passthrough(Types.UNSIGNED_BYTE); // Max Players
@@ -337,17 +337,18 @@ public class EntityPacketRewriter1_14 extends LegacyEntityRewriter<ClientboundPa
                 map(Types.INT); // 0 - Dimension ID
 
                 handler(wrapper -> {
-                    ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_14To1_13_2.class);
+                    ProtocolStorables1_14 storables = wrapper.user().storables(protocol);
+                    ClientWorld clientWorld = storables.clientWorld();
                     int dimensionId = wrapper.get(Types.INT, 0);
 
                     if (clientWorld.setEnvironment(dimensionId)) {
                         EntityTracker tracker = tracker(wrapper.user());
                         tracker.clearEntities();
-                        wrapper.user().get(ChunkLightStorage.class).clear();
+                        storables.chunkLightStorage().clear();
                         tracker.entity(tracker.clientEntityId()).put(new EntityPositionStorage1_14());
                     }
 
-                    short difficulty = wrapper.user().get(DifficultyStorage.class).getDifficulty();
+                    short difficulty = storables.difficultyStorage().getDifficulty();
                     wrapper.write(Types.UNSIGNED_BYTE, difficulty);
                 });
             }

@@ -71,7 +71,7 @@ public class Protocol1_9_3To1_9_1 extends BackwardsProtocol<ClientboundPackets1_
         });
 
         registerClientbound(ClientboundPackets1_9_3.LEVEL_CHUNK, wrapper -> {
-            ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_9_3To1_9_1.class);
+            ClientWorld clientWorld = wrapper.user().storables(this).clientWorld();
 
             ChunkType1_9_3 newType = ChunkType1_9_3.forEnvironment(clientWorld.getEnvironment());
             ChunkType1_9_1 oldType = ChunkType1_9_1.forEnvironment(clientWorld.getEnvironment()); // Get the old type to not write Block Entities
@@ -89,7 +89,7 @@ public class Protocol1_9_3To1_9_1 extends BackwardsProtocol<ClientboundPackets1_
                 map(Types.INT); // 2 - Dimension
 
                 handler(wrapper -> {
-                    ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_9_3To1_9_1.class);
+                    ClientWorld clientWorld = wrapper.user().storables(Protocol1_9_3To1_9_1.this).clientWorld();
 
                     int dimensionId = wrapper.get(Types.INT, 1);
                     clientWorld.setEnvironment(dimensionId);
@@ -103,7 +103,7 @@ public class Protocol1_9_3To1_9_1 extends BackwardsProtocol<ClientboundPackets1_
                 map(Types.INT); // 0 - Dimension ID
 
                 handler(wrapper -> {
-                    ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_9_3To1_9_1.class);
+                    ClientWorld clientWorld = wrapper.user().storables(Protocol1_9_3To1_9_1.this).clientWorld();
 
                     int dimensionId = wrapper.get(Types.INT, 0);
                     clientWorld.setEnvironment(dimensionId);
@@ -117,6 +117,6 @@ public class Protocol1_9_3To1_9_1 extends BackwardsProtocol<ClientboundPackets1_
 
     @Override
     public void init(UserConnection userConnection) {
-        userConnection.addClientWorld(this.getClass(), new ClientWorld());
+        userConnection.storables(this).setClientWorld(new ClientWorld());
     }
 }

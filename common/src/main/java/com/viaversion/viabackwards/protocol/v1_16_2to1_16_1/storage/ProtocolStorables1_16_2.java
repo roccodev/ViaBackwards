@@ -15,19 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage;
+package com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 
-public final class GameModeStorage implements StorableObject {
+public final class ProtocolStorables1_16_2 extends ProtocolStorablesBase {
 
-    private int gameMode = -1;
+    private final BiomeStorage biomeStorage = new BiomeStorage();
 
-    public int gameMode() {
-        return gameMode;
-    }
-
-    public void setGameMode(final int gameMode) {
-        this.gameMode = gameMode;
+    public BiomeStorage biomeStorage() {
+        return biomeStorage;
     }
 }

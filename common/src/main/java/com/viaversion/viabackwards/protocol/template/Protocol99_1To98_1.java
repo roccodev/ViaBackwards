@@ -22,14 +22,11 @@ import com.viaversion.viabackwards.api.data.BackwardsMappingData;
 import com.viaversion.viabackwards.api.rewriters.BackwardsRegistryRewriter;
 import com.viaversion.viabackwards.api.rewriters.text.NBTComponentRewriter;
 import com.viaversion.viaversion.api.connection.UserConnection;
-import com.viaversion.viaversion.api.minecraft.entities.EntityTypes1_21_11;
 import com.viaversion.viaversion.api.protocol.packet.provider.PacketTypesProvider;
 import com.viaversion.viaversion.api.protocol.packet.provider.SimplePacketTypesProvider;
 import com.viaversion.viaversion.api.type.types.chunk.ChunkType26_1;
 import com.viaversion.viaversion.api.type.types.version.VersionedTypes;
 import com.viaversion.viaversion.api.type.types.version.VersionedTypesHolder;
-import com.viaversion.viaversion.data.entity.EntityTrackerBase;
-import com.viaversion.viaversion.data.item.ItemHasherBase;
 import com.viaversion.viaversion.protocols.v1_21_11to26_1.Protocol1_21_11To26_1;
 import com.viaversion.viaversion.protocols.v1_21_11to26_1.packet.ClientboundPacket26_1;
 import com.viaversion.viaversion.protocols.v1_21_11to26_1.packet.ClientboundPackets26_1;
@@ -79,9 +76,15 @@ final class Protocol99_1To98_1 extends BackwardsProtocol<ClientboundPacket26_1, 
 
     @Override
     public void init(final UserConnection connection) {
-        addEntityTracker(connection, new EntityTrackerBase(connection, EntityTypes1_21_11.PLAYER));
-        connection.addItemHasher(this.getClass(), new ItemHasherBase(this, connection));
+        addEntityTracker(connection);
+        addItemHasher(connection);
     }
+
+    // If data beyond the tracker and hasher is required
+    //@Override
+    //public ProtocolStorablesBase createStorables() {
+    //    return new ProtocolStorables99_1();
+    //}
 
     @Override
     public BackwardsMappingData getMappingData() {

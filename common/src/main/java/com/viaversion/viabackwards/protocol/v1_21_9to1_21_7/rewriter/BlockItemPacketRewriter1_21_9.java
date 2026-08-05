@@ -20,7 +20,7 @@ package com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.rewriter;
 import com.viaversion.nbt.tag.CompoundTag;
 import com.viaversion.viabackwards.api.rewriters.BackwardsStructuredItemRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.Protocol1_21_9To1_21_7;
-import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.DimensionScaleStorage;
+import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.ProtocolStorables1_21_9;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.data.entity.EntityTracker;
 import com.viaversion.viaversion.api.minecraft.ResolvableProfile;
@@ -108,7 +108,8 @@ public final class BlockItemPacketRewriter1_21_9 extends BackwardsStructuredItem
 
         final EntityTracker tracker = protocol.getEntityRewriter().tracker(wrapper.user());
         if (tracker.currentDimensionId() != -1) {
-            final double scale = wrapper.user().get(DimensionScaleStorage.class).getScale(tracker.currentDimensionId());
+            final ProtocolStorables1_21_9 storables = wrapper.user().storables(protocol);
+            final double scale = storables.dimensionScaleStorage().getScale(tracker.currentDimensionId());
             centerX *= scale;
             centerZ *= scale;
         }

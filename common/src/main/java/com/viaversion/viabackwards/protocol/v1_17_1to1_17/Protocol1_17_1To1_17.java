@@ -21,7 +21,7 @@ import com.viaversion.nbt.tag.CompoundTag;
 import com.viaversion.nbt.tag.ListTag;
 import com.viaversion.nbt.tag.StringTag;
 import com.viaversion.viabackwards.api.BackwardsProtocol;
-import com.viaversion.viabackwards.protocol.v1_17_1to1_17.storage.InventoryStateIds;
+import com.viaversion.viabackwards.protocol.v1_17_1to1_17.storage.ProtocolStorables1_17_1;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage.PlayerLastCursorItem;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.item.Item;
@@ -56,17 +56,17 @@ public final class Protocol1_17_1To1_17 extends BackwardsProtocol<ClientboundPac
 
         registerClientbound(ClientboundPackets1_17_1.CONTAINER_CLOSE, wrapper -> {
             short containerId = wrapper.passthrough(Types.UNSIGNED_BYTE);
-            wrapper.user().get(InventoryStateIds.class).removeStateId(containerId);
+            wrapper.user().<ProtocolStorables1_17_1>storables(this).inventoryStateIds().removeStateId(containerId);
         });
         registerClientbound(ClientboundPackets1_17_1.CONTAINER_SET_SLOT, wrapper -> {
             byte containerId = wrapper.passthrough(Types.BYTE);
             int stateId = wrapper.read(Types.VAR_INT);
-            wrapper.user().get(InventoryStateIds.class).setStateId(containerId, stateId);
+            wrapper.user().<ProtocolStorables1_17_1>storables(this).inventoryStateIds().setStateId(containerId, stateId);
         });
         registerClientbound(ClientboundPackets1_17_1.CONTAINER_SET_CONTENT, wrapper -> {
             short containerId = wrapper.passthrough(Types.UNSIGNED_BYTE);
             int stateId = wrapper.read(Types.VAR_INT);
-            wrapper.user().get(InventoryStateIds.class).setStateId(containerId, stateId);
+            wrapper.user().<ProtocolStorables1_17_1>storables(this).inventoryStateIds().setStateId(containerId, stateId);
 
             // Length is encoded as a var int in 1.17.1
             wrapper.write(Types.ITEM1_13_2_SHORT_ARRAY, wrapper.read(Types.ITEM1_13_2_ARRAY));
@@ -74,7 +74,7 @@ public final class Protocol1_17_1To1_17 extends BackwardsProtocol<ClientboundPac
             // Carried item - forward as CONTAINER_SET_SLOT for <1.17 clients
             Item carried = wrapper.read(Types.ITEM1_13_2);
 
-            PlayerLastCursorItem lastCursorItem = wrapper.user().get(PlayerLastCursorItem.class);
+            PlayerLastCursorItem lastCursorItem = wrapper.user().<ProtocolStorables1_17_1>storables(this).playerLastCursorItem();
             if (lastCursorItem != null) {
                 // For click drag ghost item fix -- since the state ID is always wrong,
                 // the server always resends the entire window contents after a drag action,
@@ -97,11 +97,11 @@ public final class Protocol1_17_1To1_17 extends BackwardsProtocol<ClientboundPac
 
         registerServerbound(ServerboundPackets1_17.CONTAINER_CLOSE, wrapper -> {
             byte containerId = wrapper.passthrough(Types.BYTE);
-            wrapper.user().get(InventoryStateIds.class).removeStateId(containerId);
+            wrapper.user().<ProtocolStorables1_17_1>storables(this).inventoryStateIds().removeStateId(containerId);
         });
         registerServerbound(ServerboundPackets1_17.CONTAINER_CLICK, wrapper -> {
             byte containerId = wrapper.passthrough(Types.BYTE);
-            int stateId = wrapper.user().get(InventoryStateIds.class).removeStateId(containerId);
+            int stateId = wrapper.user().<ProtocolStorables1_17_1>storables(this).inventoryStateIds().removeStateId(containerId);
             wrapper.write(Types.VAR_INT, stateId == Integer.MAX_VALUE ? 0 : stateId);
         });
 
@@ -158,7 +158,7 @@ public final class Protocol1_17_1To1_17 extends BackwardsProtocol<ClientboundPac
     }
 
     @Override
-    public void init(UserConnection connection) {
-        connection.put(new InventoryStateIds());
+    public ProtocolStorables1_17_1 createStorables() {
+        return new ProtocolStorables1_17_1();
     }
 }

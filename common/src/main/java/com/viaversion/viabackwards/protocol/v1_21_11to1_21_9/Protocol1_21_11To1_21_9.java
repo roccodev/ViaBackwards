@@ -31,7 +31,7 @@ import com.viaversion.viabackwards.api.rewriters.text.NBTComponentRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.rewriter.BlockItemPacketRewriter1_21_11;
 import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.rewriter.ComponentRewriter1_21_11;
 import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.rewriter.EntityPacketRewriter1_21_11;
-import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.storage.GameTimeStorage;
+import com.viaversion.viabackwards.protocol.v1_21_11to1_21_9.storage.ProtocolStorables1_21_11;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.data.FullMappings;
 import com.viaversion.viaversion.api.minecraft.entities.EntityTypes1_21_11;
@@ -243,8 +243,12 @@ public final class Protocol1_21_11To1_21_9 extends BackwardsProtocol<Clientbound
     @Override
     public void init(final UserConnection connection) {
         addEntityTracker(connection, new EntityTrackerBase(connection, EntityTypes1_21_11.PLAYER));
-        connection.addItemHasher(this.getClass(), new ItemHasherBase(this, connection));
-        connection.put(new GameTimeStorage());
+        connection.storables(this).setItemHasher(new ItemHasherBase(this, connection));
+    }
+
+    @Override
+    public ProtocolStorables1_21_11 createStorables() {
+        return new ProtocolStorables1_21_11();
     }
 
     @Override

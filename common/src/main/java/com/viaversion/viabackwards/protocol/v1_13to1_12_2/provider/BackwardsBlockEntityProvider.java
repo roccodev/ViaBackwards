@@ -20,6 +20,7 @@ package com.viaversion.viabackwards.protocol.v1_13to1_12_2.provider;
 
 import com.viaversion.nbt.tag.CompoundTag;
 import com.viaversion.nbt.tag.StringTag;
+import com.viaversion.viabackwards.protocol.v1_13to1_12_2.Protocol1_13To1_12_2;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.BannerHandler;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.BedHandler;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.FlowerPotHandler;
@@ -27,6 +28,7 @@ import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.SkullHandler;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.SpawnerHandler;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.BackwardsBlockStorage;
+import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.ProtocolStorables1_13;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.BlockPosition;
 import com.viaversion.viaversion.api.platform.providers.Provider;
@@ -36,8 +38,10 @@ import java.util.Map;
 
 public class BackwardsBlockEntityProvider implements Provider {
     private final Map<String, BackwardsBlockEntityProvider.BackwardsBlockEntityHandler> handlers = new HashMap<>();
+    private final Protocol1_13To1_12_2 protocol;
 
-    public BackwardsBlockEntityProvider() {
+    public BackwardsBlockEntityProvider(final Protocol1_13To1_12_2 protocol) {
+        this.protocol = protocol;
         handlers.put("flower_pot", new FlowerPotHandler()); // TODO requires special treatment, manually send
         handlers.put("bed", new BedHandler());
         handlers.put("banner", new BannerHandler());
@@ -75,7 +79,7 @@ public class BackwardsBlockEntityProvider implements Provider {
             return tag;
         }
 
-        BackwardsBlockStorage storage = user.get(BackwardsBlockStorage.class);
+        BackwardsBlockStorage storage = user.<ProtocolStorables1_13>storables(protocol).backwardsBlockStorage();
         Integer blockId = storage.get(position);
         if (blockId == null) {
             return tag;

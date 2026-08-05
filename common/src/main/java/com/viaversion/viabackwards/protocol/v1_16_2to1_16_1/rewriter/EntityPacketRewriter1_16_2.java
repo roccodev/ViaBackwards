@@ -26,6 +26,7 @@ import com.viaversion.viabackwards.ViaBackwards;
 import com.viaversion.viabackwards.api.rewriters.EntityRewriter;
 import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.Protocol1_16_2To1_16_1;
 import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.storage.BiomeStorage;
+import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.storage.ProtocolStorables1_16_2;
 import com.viaversion.viaversion.api.minecraft.entities.EntityType;
 import com.viaversion.viaversion.api.minecraft.entities.EntityTypes1_16_2;
 import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers;
@@ -73,7 +74,8 @@ public class EntityPacketRewriter1_16_2 extends EntityRewriter<ClientboundPacket
                     if (wrapper.user().getProtocolInfo().protocolVersion().olderThanOrEqualTo(ProtocolVersion.v1_15_2)) {
                         // Store biomes for <1.16 client handling
                         ListTag<CompoundTag> biomes = TagUtil.getRegistryEntries(registry, "worldgen/biome");
-                        BiomeStorage biomeStorage = wrapper.user().get(BiomeStorage.class);
+                        ProtocolStorables1_16_2 storables = wrapper.user().storables(protocol);
+                        BiomeStorage biomeStorage = storables.biomeStorage();
                         biomeStorage.clear();
                         for (CompoundTag biome : biomes) {
                             StringTag name = biome.getStringTag("name");

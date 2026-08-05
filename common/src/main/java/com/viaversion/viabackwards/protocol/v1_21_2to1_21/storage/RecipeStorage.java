@@ -19,7 +19,6 @@ package com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage;
 
 import com.google.common.base.Preconditions;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.Protocol1_21_2To1_21;
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.HolderSet;
 import com.viaversion.viaversion.api.minecraft.item.Item;
@@ -35,7 +34,7 @@ import java.util.List;
 // Mostly a lost cause as the server will not send all the necessary data.
 // Recipe displays can also be different from the actual recipe - at the end of the same,
 // the server will still properly handle inputs, but we can't fully reconstruct the recipe book.
-public final class RecipeStorage implements StorableObject {
+public final class RecipeStorage {
 
     // Pairs of open + filtering for: Crafting, furnace, blast furnace, smoker
     public static final int RECIPE_BOOK_SETTINGS = 4 * 2;

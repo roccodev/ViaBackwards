@@ -17,9 +17,7 @@
  */
 package com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
-
-public final class DayTimeStorage implements StorableObject {
+public final class DayTimeStorage {
 
     private long gameTime;
     private long dayTime;

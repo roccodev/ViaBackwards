@@ -54,7 +54,7 @@ public final class BlockItemPacketRewriter26_2 extends BackwardsStructuredItemRe
             final Chunk chunk = protocol.getBlockRewriter().handleChunk1_18(wrapper);
             protocol.getBlockRewriter().handleBlockEntities(chunk, wrapper.user());
 
-            final EntityTracker tracker = wrapper.user().getEntityTracker(Protocol26_2To26_1.class);
+            final EntityTracker tracker = wrapper.user().getEntityTracker(protocol);
 
             for (int i = 0; i < chunk.getSections().length; i++) {
                 final ChunkSection section = chunk.getSections()[i];

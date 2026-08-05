@@ -19,7 +19,7 @@ package com.viaversion.viabackwards.protocol.v26_1to1_21_11.rewriter;
 
 import com.viaversion.viabackwards.api.rewriters.EntityRewriter;
 import com.viaversion.viabackwards.protocol.v26_1to1_21_11.Protocol26_1To1_21_11;
-import com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage.GameModeStorage;
+import com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage.ProtocolStorables26_1;
 import com.viaversion.viaversion.api.minecraft.GameMode;
 import com.viaversion.viaversion.api.minecraft.Vector3d;
 import com.viaversion.viaversion.api.minecraft.entities.EntityType;
@@ -47,18 +47,21 @@ public final class EntityPacketRewriter26_1 extends EntityRewriter<ClientboundPa
     public void registerPackets() {
         protocol.appendClientbound(ClientboundPackets26_1.RESPAWN, wrapper -> {
             final byte gamemode = wrapper.get(Types.BYTE, 0);
-            wrapper.user().get(GameModeStorage.class).setGameMode(gamemode);
+            final ProtocolStorables26_1 storables = wrapper.user().storables(protocol);
+            storables.setGameMode(gamemode);
         });
         protocol.appendClientbound(ClientboundPackets26_1.LOGIN, wrapper -> {
             final byte gamemode = wrapper.get(Types.BYTE, 0);
-            wrapper.user().get(GameModeStorage.class).setGameMode(gamemode);
+            final ProtocolStorables26_1 storables = wrapper.user().storables(protocol);
+            storables.setGameMode(gamemode);
         });
         protocol.appendClientbound(ClientboundPackets26_1.GAME_EVENT, wrapper -> {
             wrapper.resetReader();
             final short event = wrapper.passthrough(Types.UNSIGNED_BYTE);
             if (event == 3) {
                 final int value = (int) Math.floor(wrapper.passthrough(Types.FLOAT) + 0.5F);
-                wrapper.user().get(GameModeStorage.class).setGameMode(value);
+                final ProtocolStorables26_1 storables = wrapper.user().storables(protocol);
+                storables.setGameMode(value);
             }
         });
 
@@ -68,7 +71,8 @@ public final class EntityPacketRewriter26_1 extends EntityRewriter<ClientboundPa
             switch (action) {
                 case INTERACT_ACTION -> wrapper.cancel(); // Drop "normal" interacts, as interact_at is always sent by Vanilla clients, and always sent first, with this following after
                 case ATTACK_ACTION -> {
-                    final boolean spectator = wrapper.user().get(GameModeStorage.class).gameMode() == GameMode.SPECTATOR.id();
+                    final ProtocolStorables26_1 storables = wrapper.user().storables(protocol);
+                    final boolean spectator = storables.gameMode() == GameMode.SPECTATOR.id();
                     wrapper.setPacketType(spectator ? ServerboundPackets26_1.SPECTATE_ENTITY : ServerboundPackets26_1.ATTACK);
                     wrapper.read(Types.BOOLEAN); // Using secondary action
                 }

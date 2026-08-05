@@ -15,17 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.viaversion.viabackwards.protocol.v1_16_4to1_16_3.storage;
+package com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage;
 
-public class PlayerHandStorage {
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 
-    private int currentHand;
+public final class ProtocolStorables1_17 extends ProtocolStorablesBase {
 
-    public int getCurrentHand() {
-        return currentHand;
-    }
+    private final PlayerLastCursorItem playerLastCursorItem = new PlayerLastCursorItem();
 
-    public void setCurrentHand(int currentHand) {
-        this.currentHand = currentHand;
+    public PlayerLastCursorItem playerLastCursorItem() {
+        return playerLastCursorItem;
     }
 }

@@ -24,6 +24,8 @@ import com.viaversion.viabackwards.api.rewriters.text.JsonNBTComponentRewriter;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.rewriter.BlockItemPacketRewriter1_17;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.rewriter.EntityPacketRewriter1_17;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage.PlayerLastCursorItem;
+import com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage.ProtocolStorables1_17;
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.RegistryType;
 import com.viaversion.viaversion.api.minecraft.TagData;
@@ -205,7 +207,11 @@ public final class Protocol1_17To1_16_4 extends BackwardsProtocol<ClientboundPac
     @Override
     public void init(UserConnection user) {
         addEntityTracker(user, new EntityTrackerBase(user, EntityTypes1_17.PLAYER));
-        user.put(new PlayerLastCursorItem());
+    }
+
+    @Override
+    public ProtocolStorablesBase createStorables() {
+        return new ProtocolStorables1_17();
     }
 
     @Override

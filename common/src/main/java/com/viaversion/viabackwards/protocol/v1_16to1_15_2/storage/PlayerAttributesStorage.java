@@ -18,7 +18,6 @@
 package com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage;
 
 import com.viaversion.viabackwards.protocol.v1_16to1_15_2.Protocol1_16To1_15_2;
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.type.Types;
@@ -27,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class PlayerAttributesStorage implements StorableObject {
+public final class PlayerAttributesStorage {
 
     private final Map<String, Attribute> attributes = new HashMap<>();
 

@@ -17,14 +17,13 @@
  */
 package com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class TabCompleteStorage implements StorableObject {
+public class TabCompleteStorage {
     private final Map<UUID, String> usernames = new HashMap<>();
     private final Set<String> commands = new HashSet<>();
     private int lastId;

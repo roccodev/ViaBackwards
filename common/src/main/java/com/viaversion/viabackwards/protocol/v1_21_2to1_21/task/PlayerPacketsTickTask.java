@@ -21,13 +21,14 @@ import com.viaversion.viabackwards.ViaBackwards;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.Protocol1_21_2To1_21;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.PlayerStorage;
 import com.viaversion.viaversion.api.connection.ProtocolInfo;
+import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.BackwardsStorables1_21_2;
+import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.data.entity.EntityTracker;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.protocol.packet.State;
 import com.viaversion.viaversion.connection.StorableObjectTask;
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ServerboundPackets1_21_2;
-import com.viaversion.viaversion.protocols.v1_21to1_21_2.storage.ClientVehicleStorage;
 import java.util.logging.Level;
 
 public final class PlayerPacketsTickTask extends StorableObjectTask<PlayerStorage> {
@@ -43,13 +44,15 @@ public final class PlayerPacketsTickTask extends StorableObjectTask<PlayerStorag
             return;
         }
 
-        final EntityTracker entityTracker = connection.getEntityTracker(Protocol1_21_2To1_21.class);
+        final Protocol1_21_2To1_21 protocol = Via.getManager().getProtocolManager().getProtocol(Protocol1_21_2To1_21.class);
+        final EntityTracker entityTracker = connection.getEntityTracker(protocol);
         if (!entityTracker.hasClientEntityId()) {
             return;
         }
 
         try {
-            if (!connection.has(ClientVehicleStorage.class)) {
+            final BackwardsStorables1_21_2 storables = connection.storables(protocol);
+            if (storables.clientVehicleStorage() == null) {
                 storableObject.tick(connection);
             }
         } catch (final Throwable t) {

@@ -24,6 +24,8 @@ import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.rewriter.BlockItemPa
 import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.rewriter.CommandRewriter1_16_2;
 import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.rewriter.EntityPacketRewriter1_16_2;
 import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.storage.BiomeStorage;
+import com.viaversion.viabackwards.protocol.v1_16_2to1_16_1.storage.ProtocolStorables1_16_2;
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
 import com.viaversion.viabackwards.utils.BackwardsProtocolLogger;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.RegistryType;
@@ -109,8 +111,15 @@ public class Protocol1_16_2To1_16_1 extends BackwardsProtocol<ClientboundPackets
 
     @Override
     public void init(UserConnection user) {
-        user.put(new BiomeStorage());
-        user.addEntityTracker(this.getClass(), new EntityTrackerBase(user, EntityTypes1_16_2.PLAYER));
+        addEntityTracker(user, new EntityTrackerBase(user, EntityTypes1_16_2.PLAYER));
+        final ProtocolStorables1_16_2 storables = user.storables(this);
+        // BiomeStorage is also used in 1.16->1.15.2
+        user.put(storables.biomeStorage());
+    }
+
+    @Override
+    public ProtocolStorablesBase createStorables() {
+        return new ProtocolStorables1_16_2();
     }
 
     @Override

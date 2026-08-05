@@ -17,9 +17,7 @@
  */
 package com.viaversion.viabackwards.protocol.v1_16to1_15_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
-
-public class PlayerSneakStorage implements StorableObject {
+public class PlayerSneakStorage {
     private boolean sneaking;
 
     public boolean isSneaking() {

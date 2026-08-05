@@ -27,7 +27,7 @@ import com.viaversion.viabackwards.protocol.v1_14to1_13_2.rewriter.EntityPacketR
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.rewriter.PlayerPacketRewriter1_14;
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.rewriter.SoundPacketRewriter1_14;
 import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ChunkLightStorage;
-import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.DifficultyStorage;
+import com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage.ProtocolStorables1_14;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.ClientWorld;
 import com.viaversion.viaversion.api.minecraft.RegistryType;
@@ -121,7 +121,8 @@ public class Protocol1_14To1_13_2 extends BackwardsProtocol<ClientboundPackets1_
             }
 
             //TODO Soft memory leak: Don't store light if chunk is already loaded
-            wrapper.user().get(ChunkLightStorage.class).setStoredLight(skyLight, blockLight, x, z);
+            ProtocolStorables1_14 storables = wrapper.user().storables(this);
+            storables.chunkLightStorage().setStoredLight(skyLight, blockLight, x, z);
             wrapper.cancel();
         });
     }
@@ -132,14 +133,14 @@ public class Protocol1_14To1_13_2 extends BackwardsProtocol<ClientboundPackets1_
 
     @Override
     public void init(UserConnection user) {
-        user.addEntityTracker(this.getClass(), new EntityTrackerBase(user, EntityTypes1_14.PLAYER));
-        user.addClientWorld(this.getClass(), new ClientWorld());
+        addEntityTracker(user, new EntityTrackerBase(user, EntityTypes1_14.PLAYER));
+        final ProtocolStorables1_14 storables = user.storables(this);
+        storables.setClientWorld(new ClientWorld());
+    }
 
-        if (!user.has(ChunkLightStorage.class)) {
-            user.put(new ChunkLightStorage());
-        }
-
-        user.put(new DifficultyStorage());
+    @Override
+    public ProtocolStorables1_14 createStorables() {
+        return new ProtocolStorables1_14();
     }
 
     @Override

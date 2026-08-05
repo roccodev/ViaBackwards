@@ -17,7 +17,6 @@
  */
 package com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper;
 import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.util.Key;
@@ -25,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class ItemTagStorage implements StorableObject {
+public final class ItemTagStorage {
 
     private Map<String, int[]> itemTags = new HashMap<>();
 

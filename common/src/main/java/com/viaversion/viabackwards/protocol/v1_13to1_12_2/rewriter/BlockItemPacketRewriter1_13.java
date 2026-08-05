@@ -34,6 +34,7 @@ import com.viaversion.viabackwards.protocol.v1_13to1_12_2.block_entity_handlers.
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.provider.BackwardsBlockEntityProvider;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.BackwardsBlockStorage;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.NoteBlockStorage;
+import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.ProtocolStorables1_13;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.BlockChangeRecord;
@@ -140,7 +141,8 @@ public class BlockItemPacketRewriter1_13 extends BackwardsItemRewriter<Clientbou
                         blockId = blockId - 483 + 219;
 
                     if (blockId == 25) { // Note block
-                        final NoteBlockStorage noteBlockStorage = wrapper.user().get(NoteBlockStorage.class);
+                        ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+                        final NoteBlockStorage noteBlockStorage = storables.noteBlockStorage();
 
                         final BlockPosition position = wrapper.get(Types.BLOCK_POSITION1_8, 0);
                         final Pair<Integer, Integer> update = noteBlockStorage.getNoteBlockUpdate(position);
@@ -185,7 +187,8 @@ public class BlockItemPacketRewriter1_13 extends BackwardsItemRewriter<Clientbou
             int chunkMinZ = wrapper.passthrough(Types.INT) << 4;
             int chunkMaxX = chunkMinX + 15;
             int chunkMaxZ = chunkMinZ + 15;
-            BackwardsBlockStorage blockStorage = wrapper.user().get(BackwardsBlockStorage.class);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            BackwardsBlockStorage blockStorage = storables.backwardsBlockStorage();
             blockStorage.getBlocks().entrySet().removeIf(entry -> {
                 BlockPosition position = entry.getKey();
                 return position.x() >= chunkMinX && position.z() >= chunkMinZ
@@ -202,14 +205,15 @@ public class BlockItemPacketRewriter1_13 extends BackwardsItemRewriter<Clientbou
                 handler(wrapper -> {
                     int blockState = wrapper.read(Types.VAR_INT);
                     BlockPosition position = wrapper.get(Types.BLOCK_POSITION1_8, 0);
+                    ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
 
                     // Note block special treatment
                     if (blockState >= 249 && blockState <= 748) { // Note block states id range
-                        wrapper.user().get(NoteBlockStorage.class).storeNoteBlockUpdate(position, blockState);
+                        storables.noteBlockStorage().storeNoteBlockUpdate(position, blockState);
                     }
 
                     // Store blocks
-                    BackwardsBlockStorage storage = wrapper.user().get(BackwardsBlockStorage.class);
+                    BackwardsBlockStorage storage = storables.backwardsBlockStorage();
                     storage.checkAndStore(position, blockState);
 
                     wrapper.write(Types.VAR_INT, protocol.getMappingData().getNewBlockStateId(blockState));
@@ -228,7 +232,8 @@ public class BlockItemPacketRewriter1_13 extends BackwardsItemRewriter<Clientbou
                 map(Types.INT); // 1 - Chunk Z
                 map(Types.BLOCK_CHANGE_ARRAY);
                 handler(wrapper -> {
-                    BackwardsBlockStorage storage = wrapper.user().get(BackwardsBlockStorage.class);
+                    ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+                    BackwardsBlockStorage storage = storables.backwardsBlockStorage();
 
                     for (BlockChangeRecord record : wrapper.get(Types.BLOCK_CHANGE_ARRAY, 0)) {
                         int chunkX = wrapper.get(Types.INT, 0);
@@ -253,7 +258,8 @@ public class BlockItemPacketRewriter1_13 extends BackwardsItemRewriter<Clientbou
         });
 
         protocol.registerClientbound(ClientboundPackets1_13.LEVEL_CHUNK, wrapper -> {
-            ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_13To1_12_2.class);
+            ProtocolStorables1_13 storables = wrapper.user().storables(protocol);
+            ClientWorld clientWorld = storables.clientWorld();
 
             ChunkType1_9_3 type_old = ChunkType1_9_3.forEnvironment(clientWorld.getEnvironment());
             ChunkType1_13 type = ChunkType1_13.forEnvironment(clientWorld.getEnvironment());
@@ -261,7 +267,7 @@ public class BlockItemPacketRewriter1_13 extends BackwardsItemRewriter<Clientbou
 
             // Handle Block Entities before block rewrite
             BackwardsBlockEntityProvider provider = Via.getManager().getProviders().get(BackwardsBlockEntityProvider.class);
-            BackwardsBlockStorage storage = wrapper.user().get(BackwardsBlockStorage.class);
+            BackwardsBlockStorage storage = storables.backwardsBlockStorage();
             for (CompoundTag tag : chunk.getBlockEntities()) {
                 StringTag idTag = tag.getStringTag("id");
                 if (idTag == null) continue;

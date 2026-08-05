@@ -26,8 +26,12 @@ import com.viaversion.viabackwards.api.rewriters.BackwardsItemRewriter;
 import com.viaversion.viabackwards.api.rewriters.MapColorRewriter;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.Protocol1_17To1_16_4;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.data.MapColorMappings1_16_4;
+import com.viaversion.viabackwards.protocol.v1_17_1to1_17.Protocol1_17_1To1_17;
 import com.viaversion.viabackwards.protocol.v1_17_1to1_17.storage.InventoryStateIds;
+import com.viaversion.viabackwards.protocol.v1_17_1to1_17.storage.ProtocolStorables1_17_1;
+import com.viaversion.viaversion.api.Via;
 import com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage.PlayerLastCursorItem;
+import com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage.ProtocolStorables1_17;
 import com.viaversion.viaversion.api.data.entity.EntityTracker;
 import com.viaversion.viaversion.api.minecraft.BlockChangeRecord;
 import com.viaversion.viaversion.api.minecraft.chunks.Chunk;
@@ -99,13 +103,15 @@ public final class BlockItemPacketRewriter1_17 extends BackwardsItemRewriter<Cli
                     // that we can't easily predict. Force a state ID mismatch so the server
                     // sends a full inventory resync instead of individual slot corrections.
                     if (mode != 0) {
-                        InventoryStateIds stateIds = wrapper.user().get(InventoryStateIds.class);
+                        ProtocolStorables1_17_1 storables1_17_1 = wrapper.user().storables(Via.getManager().getProtocolManager().getProtocol(Protocol1_17_1To1_17.class));
+                        InventoryStateIds stateIds = storables1_17_1.inventoryStateIds();
                         if (stateIds != null) {
                             stateIds.setStateId(wrapper.get(Types.BYTE, 0), -1);
                         }
                     }
 
-                    PlayerLastCursorItem state = wrapper.user().get(PlayerLastCursorItem.class);
+                    ProtocolStorables1_17 storables = wrapper.user().storables(protocol);
+                    PlayerLastCursorItem state = storables.playerLastCursorItem();
                     if (mode == 0 && button == 0 && clicked != null) {
                         // Left click PICKUP
                         // Carried item will (usually) be the entire clicked stack
@@ -154,7 +160,8 @@ public final class BlockItemPacketRewriter1_17 extends BackwardsItemRewriter<Cli
                 // carried item, and the server will helpfully send this packet allowing us
                 // to update the internal state. This is necessary for fixing multiple sequential
                 // click drag actions without intermittent pickup actions.
-                wrapper.user().get(PlayerLastCursorItem.class).setLastCursorItem(carried);
+                ProtocolStorables1_17 storables = wrapper.user().storables(protocol);
+                storables.playerLastCursorItem().setLastCursorItem(carried);
             }
 
             wrapper.write(Types.ITEM1_13_2, handleItemToClient(wrapper.user(), carried));
@@ -228,7 +235,7 @@ public final class BlockItemPacketRewriter1_17 extends BackwardsItemRewriter<Cli
                 map(Types.VAR_INT); // Z
                 map(Types.BOOLEAN); // Trust edges
                 handler(wrapper -> {
-                    EntityTracker tracker = wrapper.user().getEntityTracker(Protocol1_17To1_16_4.class);
+                    EntityTracker tracker = wrapper.user().getEntityTracker(protocol);
                     int startFromSection = Math.max(0, -(tracker.currentMinY() >> 4));
 
                     long[] skyLightMask = wrapper.read(Types.LONG_ARRAY_PRIMITIVE);
@@ -344,7 +351,7 @@ public final class BlockItemPacketRewriter1_17 extends BackwardsItemRewriter<Cli
         });
 
         protocol.registerClientbound(ClientboundPackets1_17.LEVEL_CHUNK, wrapper -> {
-            EntityTracker tracker = wrapper.user().getEntityTracker(Protocol1_17To1_16_4.class);
+            EntityTracker tracker = wrapper.user().getEntityTracker(protocol);
             int currentWorldSectionHeight = tracker.currentWorldSectionHeight();
 
             Chunk chunk = wrapper.read(new ChunkType1_17(currentWorldSectionHeight));

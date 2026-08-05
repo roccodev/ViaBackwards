@@ -88,8 +88,8 @@ public class Protocol1_15To1_14_4 extends BackwardsProtocol<ClientboundPackets1_
 
     @Override
     public void init(UserConnection user) {
-        user.addEntityTracker(getClass(), new EntityTrackerBase(user, EntityTypes1_15.PLAYER));
-        user.addClientWorld(getClass(), new ClientWorld());
+        user.storables(this).setEntityTracker(new EntityTrackerBase(user, EntityTypes1_15.PLAYER));
+        user.storables(this).setClientWorld(new ClientWorld());
 
         user.put(new ImmediateRespawnStorage());
     }

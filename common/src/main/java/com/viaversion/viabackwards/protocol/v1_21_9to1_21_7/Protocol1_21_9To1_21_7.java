@@ -29,8 +29,7 @@ import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.rewriter.ComponentRe
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.rewriter.EntityPacketRewriter1_21_9;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.rewriter.ParticleRewriter1_21_9;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.rewriter.RegistryDataRewriter1_21_9;
-import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.DimensionScaleStorage;
-import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.PlayerRotationStorage;
+import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.ProtocolStorables1_21_9;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.tracker.EntityTracker1_21_9;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.data.version.StructuredDataKeys1_21_5;
@@ -59,7 +58,6 @@ import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ClientboundPac
 import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ClientboundPackets1_21_9;
 import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ServerboundConfigurationPackets1_21_9;
 import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ServerboundPacket1_21_9;
-import com.viaversion.viaversion.protocols.v1_21to1_21_2.storage.BundleStateTracker;
 import com.viaversion.viaversion.rewriter.BlockRewriter;
 import com.viaversion.viaversion.rewriter.ParticleRewriter;
 import com.viaversion.viaversion.rewriter.RecipeDisplayRewriter;
@@ -181,7 +179,10 @@ public final class Protocol1_21_9To1_21_7 extends BackwardsProtocol<ClientboundP
                 wrapper.write(Types.VAR_INT, 0); // Subscription registry id (DEDICATED_SERVER_TICK_TIME)
             }
         });
-        registerClientbound(ClientboundPackets1_21_9.BUNDLE_DELIMITER, wrapper -> wrapper.user().get(BundleStateTracker.class).toggleBundling());
+        registerClientbound(ClientboundPackets1_21_9.BUNDLE_DELIMITER, wrapper -> {
+            ProtocolStorables1_21_9 storables = wrapper.user().storables(this);
+            storables.bundleStateTracker().toggleBundling();
+        });
 
         cancelClientbound(ClientboundPackets1_21_9.DEBUG_BLOCK_VALUE);
         cancelClientbound(ClientboundPackets1_21_9.DEBUG_CHUNK_VALUE);
@@ -193,10 +194,12 @@ public final class Protocol1_21_9To1_21_7 extends BackwardsProtocol<ClientboundP
     @Override
     public void init(final UserConnection connection) {
         addEntityTracker(connection, new EntityTracker1_21_9(connection, EntityTypes1_21_9.PLAYER));
-        connection.addItemHasher(this.getClass(), new ItemHasherBase(this, connection));
-        connection.put(new PlayerRotationStorage());
-        connection.put(new DimensionScaleStorage());
-        connection.put(new BundleStateTracker());
+        connection.storables(this).setItemHasher(new ItemHasherBase(this, connection));
+    }
+
+    @Override
+    public ProtocolStorables1_21_9 createStorables() {
+        return new ProtocolStorables1_21_9();
     }
 
     @Override

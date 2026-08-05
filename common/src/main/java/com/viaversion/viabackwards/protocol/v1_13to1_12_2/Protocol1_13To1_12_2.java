@@ -28,10 +28,8 @@ import com.viaversion.viabackwards.protocol.v1_13to1_12_2.rewriter.BlockItemPack
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.rewriter.EntityPacketRewriter1_13;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.rewriter.PlayerPacketRewriter1_13;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.rewriter.SoundPacketRewriter1_13;
-import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.BackwardsBlockStorage;
-import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.NoteBlockStorage;
 import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.PlayerPositionStorage1_13;
-import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.TabCompleteStorage;
+import com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage.ProtocolStorables1_13;
 import com.viaversion.viabackwards.utils.BackwardsProtocolLogger;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.connection.UserConnection;
@@ -86,7 +84,7 @@ public class Protocol1_13To1_12_2 extends BackwardsProtocol<ClientboundPackets1_
         super.registerPackets();
 
         PaintingNames1_13.init();
-        Via.getManager().getProviders().register(BackwardsBlockEntityProvider.class, new BackwardsBlockEntityProvider());
+        Via.getManager().getProviders().register(BackwardsBlockEntityProvider.class, new BackwardsBlockEntityProvider(this));
 
         translatableRewriter.registerLoginDisconnect();
         translatableRewriter.registerBossEvent(ClientboundPackets1_13.BOSS_EVENT);
@@ -113,17 +111,18 @@ public class Protocol1_13To1_12_2 extends BackwardsProtocol<ClientboundPackets1_
 
     @Override
     public void init(UserConnection user) {
-        user.addEntityTracker(this.getClass(), new EntityTrackerBase(user, EntityTypes1_13.EntityType.PLAYER));
-        user.addClientWorld(this.getClass(), new ClientWorld());
+        addEntityTracker(user, new EntityTrackerBase(user, EntityTypes1_13.EntityType.PLAYER));
+        final ProtocolStorables1_13 storables = user.storables(this);
+        storables.setClientWorld(new ClientWorld());
 
-        user.put(new BackwardsBlockStorage());
-        user.put(new TabCompleteStorage());
-
-        if (ViaBackwards.getConfig().isFix1_13FacePlayer() && !user.has(PlayerPositionStorage1_13.class)) {
-            user.put(new PlayerPositionStorage1_13());
+        if (ViaBackwards.getConfig().isFix1_13FacePlayer()) {
+            storables.setPlayerPositionStorage(new PlayerPositionStorage1_13());
         }
+    }
 
-        user.put(new NoteBlockStorage());
+    @Override
+    public ProtocolStorables1_13 createStorables() {
+        return new ProtocolStorables1_13();
     }
 
     @Override

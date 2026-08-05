@@ -17,10 +17,9 @@
  */
 package com.viaversion.viabackwards.protocol.v1_17to1_16_4.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.minecraft.item.Item;
 
-public class PlayerLastCursorItem implements StorableObject {
+public class PlayerLastCursorItem {
     private Item lastCursorItem;
 
     public Item getLastCursorItem() {

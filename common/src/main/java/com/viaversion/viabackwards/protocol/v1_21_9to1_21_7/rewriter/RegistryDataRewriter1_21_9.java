@@ -21,13 +21,17 @@ import com.viaversion.nbt.tag.CompoundTag;
 import com.viaversion.viabackwards.api.BackwardsProtocol;
 import com.viaversion.viabackwards.api.rewriters.BackwardsRegistryRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.DimensionScaleStorage;
+import com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage.ProtocolStorables1_21_9;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.RegistryEntry;
 
 public final class RegistryDataRewriter1_21_9 extends BackwardsRegistryRewriter {
 
+    private final BackwardsProtocol<?, ?, ?, ?> backwardsProtocol;
+
     public RegistryDataRewriter1_21_9(final BackwardsProtocol<?, ?, ?, ?> protocol) {
         super(protocol);
+        this.backwardsProtocol = protocol;
     }
 
     @Override
@@ -37,7 +41,8 @@ public final class RegistryDataRewriter1_21_9 extends BackwardsRegistryRewriter 
             return;
         }
 
-        final DimensionScaleStorage dimensionScaleStorage = connection.get(DimensionScaleStorage.class);
+        final ProtocolStorables1_21_9 storables = connection.storables(backwardsProtocol);
+        final DimensionScaleStorage dimensionScaleStorage = storables.dimensionScaleStorage();
         for (int i = 0; i < entries.length; i++) {
             final RegistryEntry entry = entries[i];
             final CompoundTag dimension = (CompoundTag) entry.tag();

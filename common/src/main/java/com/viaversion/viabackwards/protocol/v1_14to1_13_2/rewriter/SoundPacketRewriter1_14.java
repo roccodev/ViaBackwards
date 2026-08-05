@@ -45,7 +45,7 @@ public class SoundPacketRewriter1_14 extends RewriterBase<Protocol1_14To1_13_2> 
             int category = wrapper.read(Types.VAR_INT);
             int entityId = wrapper.read(Types.VAR_INT);
 
-            TrackedEntity storedEntity = wrapper.user().getEntityTracker(protocol.getClass()).entity(entityId);
+            TrackedEntity storedEntity = wrapper.user().getEntityTracker(protocol).entity(entityId);
             EntityPositionStorage1_14 entityStorage;
             if (storedEntity == null || (entityStorage = storedEntity.get(EntityPositionStorage1_14.class)) == null) {
                 protocol.getLogger().warning("Untracked entity with id " + entityId);

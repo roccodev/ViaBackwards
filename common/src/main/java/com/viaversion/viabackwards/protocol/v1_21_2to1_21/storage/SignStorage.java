@@ -17,12 +17,11 @@
  */
 package com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.minecraft.BlockPosition;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class SignStorage implements StorableObject {
+public final class SignStorage {
 
     private final Set<BlockPosition> signs = new HashSet<>();
 

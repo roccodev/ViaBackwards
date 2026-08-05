@@ -27,7 +27,7 @@ import com.viaversion.viabackwards.protocol.v26_1to1_21_11.rewriter.BlockItemPac
 import com.viaversion.viabackwards.protocol.v26_1to1_21_11.rewriter.ComponentRewriter26_1;
 import com.viaversion.viabackwards.protocol.v26_1to1_21_11.rewriter.EntityPacketRewriter26_1;
 import com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage.DayTimeStorage;
-import com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage.GameModeStorage;
+import com.viaversion.viabackwards.protocol.v26_1to1_21_11.storage.ProtocolStorables26_1;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.minecraft.RegistryType;
 import com.viaversion.viaversion.api.minecraft.data.version.StructuredDataKeys1_21_11;
@@ -136,7 +136,8 @@ public final class Protocol26_1To1_21_11 extends BackwardsProtocol<ClientboundPa
                 }
             }
 
-            final DayTimeStorage dayTimeStorage = wrapper.user().get(DayTimeStorage.class);
+            final ProtocolStorables26_1 storables = wrapper.user().storables(this);
+            final DayTimeStorage dayTimeStorage = storables.dayTimeStorage();
             if (dayTime == null) {
                 // Determine from previously sent values based on the current game time
                 dayTime = dayTimeStorage.setGameTimeAndUpdateDayTime(gameTime);
@@ -169,9 +170,12 @@ public final class Protocol26_1To1_21_11 extends BackwardsProtocol<ClientboundPa
     @Override
     public void init(final UserConnection connection) {
         addEntityTracker(connection, new EntityTrackerBase(connection, EntityTypes1_21_11.PLAYER));
-        connection.addItemHasher(this.getClass(), new ItemHasherBase(this, connection));
-        connection.put(new DayTimeStorage());
-        connection.put(new GameModeStorage());
+        connection.storables(this).setItemHasher(new ItemHasherBase(this, connection));
+    }
+
+    @Override
+    public ProtocolStorables26_1 createStorables() {
+        return new ProtocolStorables26_1();
     }
 
     @Override

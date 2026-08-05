@@ -147,7 +147,7 @@ public class BlockItemPacketRewriter1_11 extends LegacyBlockItemRewriter<Clientb
         registerSetCreativeModeSlot(ServerboundPackets1_9_3.SET_CREATIVE_MODE_SLOT);
 
         protocol.registerClientbound(ClientboundPackets1_9_3.LEVEL_CHUNK, wrapper -> {
-            ClientWorld clientWorld = wrapper.user().getClientWorld(Protocol1_11To1_10.class);
+            ClientWorld clientWorld = wrapper.user().storables(protocol).clientWorld();
 
             ChunkType1_9_3 type = ChunkType1_9_3.forEnvironment(clientWorld.getEnvironment()); // Use the 1.10 Chunk type since nothing changed.
             Chunk chunk = wrapper.passthrough(type);
@@ -295,7 +295,7 @@ public class BlockItemPacketRewriter1_11 extends LegacyBlockItemRewriter<Clientb
     private boolean isLlama(UserConnection user) {
         WindowTracker tracker = user.get(WindowTracker.class);
         if (tracker.getInventory() != null && tracker.getInventory().equals("EntityHorse")) {
-            EntityTracker entTracker = user.getEntityTracker(Protocol1_11To1_10.class);
+            EntityTracker entTracker = user.getEntityTracker(protocol);
             TrackedEntity entityData = entTracker.entity(tracker.getEntityId());
             return entityData != null && entityData.entityType().is(EntityTypes1_11.EntityType.LLAMA);
         }
@@ -305,7 +305,7 @@ public class BlockItemPacketRewriter1_11 extends LegacyBlockItemRewriter<Clientb
     private Optional<ChestedHorseStorage> getChestedHorse(UserConnection user) {
         WindowTracker tracker = user.get(WindowTracker.class);
         if (tracker.getInventory() != null && tracker.getInventory().equals("EntityHorse")) {
-            EntityTracker entTracker = user.getEntityTracker(Protocol1_11To1_10.class);
+            EntityTracker entTracker = user.getEntityTracker(protocol);
             TrackedEntity entityData = entTracker.entity(tracker.getEntityId());
             if (entityData != null)
                 return Optional.of(entityData.get(ChestedHorseStorage.class));

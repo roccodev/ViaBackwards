@@ -17,20 +17,24 @@
  */
 package com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage;
 
-public final class PlayerRotationStorage {
+import com.viaversion.viaversion.connection.ProtocolStorablesBase;
+import com.viaversion.viaversion.protocols.v1_21to1_21_2.storage.BundleStateTracker;
 
-    private float yaw, pitch;
+public final class ProtocolStorables1_21_9 extends ProtocolStorablesBase {
 
-    public void setRotation(final float yaw, final float pitch) {
-        this.yaw = yaw;
-        this.pitch = pitch;
+    private final PlayerRotationStorage playerRotationStorage = new PlayerRotationStorage();
+    private final DimensionScaleStorage dimensionScaleStorage = new DimensionScaleStorage();
+    private final BundleStateTracker bundleStateTracker = new BundleStateTracker();
+
+    public PlayerRotationStorage playerRotationStorage() {
+        return playerRotationStorage;
     }
 
-    public float yaw() {
-        return yaw;
+    public DimensionScaleStorage dimensionScaleStorage() {
+        return dimensionScaleStorage;
     }
 
-    public float pitch() {
-        return pitch;
+    public BundleStateTracker bundleStateTracker() {
+        return bundleStateTracker;
     }
 }

@@ -17,12 +17,11 @@
  */
 package com.viaversion.viabackwards.protocol.v1_14to1_13_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.libs.fastutil.longs.Long2ObjectMap;
 import com.viaversion.viaversion.libs.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
 
-public class ChunkLightStorage implements StorableObject {
+public class ChunkLightStorage {
     public static final byte[] FULL_LIGHT = new byte[2048];
     public static final byte[] EMPTY_LIGHT = new byte[2048];
 

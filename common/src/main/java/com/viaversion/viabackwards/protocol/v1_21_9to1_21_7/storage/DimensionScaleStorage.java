@@ -17,11 +17,10 @@
  */
 package com.viaversion.viabackwards.protocol.v1_21_9to1_21_7.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class DimensionScaleStorage implements StorableObject {
+public final class DimensionScaleStorage {
 
     private final Map<Integer, Double> dimensionScales = new HashMap<>(4);
 

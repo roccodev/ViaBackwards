@@ -27,6 +27,7 @@ import com.viaversion.viabackwards.api.entities.EntityScaleHelper;
 import com.viaversion.viabackwards.api.rewriters.EntityRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.Protocol1_21_2To1_21;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.PlayerStorage;
+import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.BackwardsStorables1_21_2;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.SignStorage;
 import com.viaversion.viabackwards.utils.VelocityUtil;
 import com.viaversion.viaversion.api.data.entity.EntityTracker;
@@ -176,7 +177,8 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
 
             final EntityTracker tracker = tracker(wrapper.user());
             if (tracker.currentWorld() != null && !tracker.currentWorld().equals(world)) {
-                wrapper.user().put(new SignStorage());
+                final BackwardsStorables1_21_2 storables = wrapper.user().storables(protocol);
+                storables.setSignStorage(new SignStorage());
             }
             trackWorldDataByKey1_20_5(wrapper.user(), dimensionId, world);
         });
@@ -209,7 +211,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             final double deltaY = Math.sin(-xRadians);
             final double deltaZ = Math.cos(-yRadians - (float) Math.PI) * factor;
 
-            final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+            final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
             wrapper.write(Types.VAR_INT, 0); // From anchor
             wrapper.write(Types.DOUBLE, storage.x() + deltaX); // X
             wrapper.write(Types.DOUBLE, storage.y() + deltaY); // Y
@@ -276,7 +278,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             wrapper.passthrough(Types.VAR_INT);
             final int action = wrapper.passthrough(Types.VAR_INT);
 
-            final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+            final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
             if (action == 0) {
                 storage.setPlayerCommandTrackedSneaking(true);
             } else if (action == 1) {
@@ -331,7 +333,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             final double z = wrapper.passthrough(Types.DOUBLE);
             fixOnGround(wrapper);
 
-            final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+            final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
             storage.setPosition(x, y, z);
         });
         protocol.registerServerbound(ServerboundPackets1_20_5.MOVE_PLAYER_POS_ROT, wrapper -> {
@@ -342,7 +344,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             final float pitch = wrapper.passthrough(Types.FLOAT);
             fixOnGround(wrapper);
 
-            final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+            final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
             storage.setPosition(x, y, z);
             storage.setRotation(yaw, pitch);
         });
@@ -351,7 +353,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             final float pitch = wrapper.passthrough(Types.FLOAT);
             fixOnGround(wrapper);
 
-            final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+            final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
             storage.setRotation(yaw, pitch);
         });
         protocol.registerServerbound(ServerboundPackets1_20_5.MOVE_PLAYER_STATUS_ONLY, this::fixOnGround);
@@ -362,7 +364,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             final float yaw = wrapper.passthrough(Types.FLOAT);
             final float pitch = wrapper.passthrough(Types.FLOAT);
 
-            final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+            final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
             storage.setPosition(x, y, z);
             storage.setRotation(yaw, pitch);
         });
@@ -412,22 +414,24 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
         protocol.registerClientbound(ClientboundPackets1_21_2.SET_PASSENGERS, wrapper -> {
             final int vehicleId = wrapper.passthrough(Types.VAR_INT);
             final int[] passengerIds = wrapper.passthrough(Types.VAR_INT_ARRAY_PRIMITIVE);
-            final ClientVehicleStorage storage = wrapper.user().get(ClientVehicleStorage.class);
+            final BackwardsStorables1_21_2 storables = wrapper.user().storables(protocol);
+            final ClientVehicleStorage storage = storables.clientVehicleStorage();
             if (storage != null && vehicleId == storage.vehicleId()) {
-                wrapper.user().remove(ClientVehicleStorage.class);
+                storables.setClientVehicleStorage(null);
                 sendSneakingPlayerCommand(wrapper, false);
             }
 
             final int clientEntityId = tracker(wrapper.user()).clientEntityId();
             for (final int passenger : passengerIds) {
                 if (passenger == clientEntityId) {
-                    wrapper.user().put(new ClientVehicleStorage(vehicleId));
+                    storables.setClientVehicleStorage(new ClientVehicleStorage(vehicleId));
                     break;
                 }
             }
         });
         protocol.appendClientbound(ClientboundPackets1_21_2.REMOVE_ENTITIES, wrapper -> {
-            final ClientVehicleStorage vehicleStorage = wrapper.user().get(ClientVehicleStorage.class);
+            final BackwardsStorables1_21_2 storables = wrapper.user().storables(protocol);
+            final ClientVehicleStorage vehicleStorage = storables.clientVehicleStorage();
             if (vehicleStorage == null) {
                 return;
             }
@@ -435,7 +439,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
             final int[] entityIds = wrapper.get(Types.VAR_INT_ARRAY_PRIMITIVE, 0);
             for (final int entityId : entityIds) {
                 if (entityId == vehicleStorage.vehicleId()) {
-                    wrapper.user().remove(ClientVehicleStorage.class);
+                    storables.setClientVehicleStorage(null);
                     sendSneakingPlayerCommand(wrapper, false);
                     break;
                 }
@@ -481,7 +485,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
         @Nullable final Integer entityId
     ) {
         // Position and rotation
-        final PlayerStorage storage = wrapper.user().get(PlayerStorage.class);
+        final PlayerStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
         if ((relativeArguments & 1 << REL_X) != 0) {
             x += storage.x();
         }
@@ -563,7 +567,7 @@ public final class EntityPacketRewriter1_21_2 extends EntityRewriter<Clientbound
     }
 
     private void sendSneakingPlayerCommand(final PacketWrapper wrapper, final boolean sneaking) {
-        final PlayerStorage sneakingStorage = wrapper.user().get(PlayerStorage.class);
+        final PlayerStorage sneakingStorage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).playerStorage();
         if (sneakingStorage.setSneaking(sneaking)) {
             final PacketWrapper playerCommandPacket = wrapper.create(ServerboundPackets1_21_2.PLAYER_COMMAND);
             playerCommandPacket.write(Types.VAR_INT, tracker(wrapper.user()).clientEntityId());

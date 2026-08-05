@@ -24,6 +24,7 @@ import com.viaversion.nbt.tag.ListTag;
 import com.viaversion.nbt.tag.Tag;
 import com.viaversion.viabackwards.api.rewriters.BackwardsFullStructuredItemRewriter;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.Protocol1_21_2To1_21;
+import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.BackwardsStorables1_21_2;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.InventoryStateIdStorage;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.RecipeStorage;
 import com.viaversion.viabackwards.protocol.v1_21_2to1_21.storage.SignStorage;
@@ -91,9 +92,9 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
                 return;
             }
 
-            final EntityTracker tracker = wrapper.user().getEntityTracker(Protocol1_21_2To1_21.class);
+            final EntityTracker tracker = wrapper.user().getEntityTracker(protocol);
 
-            final SignStorage storage = wrapper.user().get(SignStorage.class);
+            final SignStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).signStorage();
             storage.removeSigns(chunk.getX(), chunk.getZ());
 
             for (int i = 0; i < chunk.getSections().length; i++) {
@@ -125,7 +126,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
                 return;
             }
 
-            final SignStorage storage = wrapper.user().get(SignStorage.class);
+            final SignStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).signStorage();
             storage.removeSign(position);
             if (signBlockState(mappedBlockId)) {
                 storage.addSign(position);
@@ -139,7 +140,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             final int chunkY = (int) (position << 44 >> 44);
             final int chunkZ = (int) (position << 22 >> 42);
 
-            final SignStorage signStorage = wrapper.user().get(SignStorage.class);
+            final SignStorage signStorage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).signStorage();
 
             final boolean equalToV1_21 = wrapper.user().getProtocolInfo().protocolVersion().equalTo(ProtocolVersion.v1_21);
 
@@ -168,7 +169,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             }
 
             final BlockPosition position = wrapper.passthrough(Types.BLOCK_POSITION1_14);
-            if (!wrapper.user().get(SignStorage.class).isSign(position)) {
+            if (!wrapper.user().<BackwardsStorables1_21_2>storables(protocol).signStorage().isSign(position)) {
                 wrapper.cancel();
             }
         });
@@ -187,7 +188,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
 
         protocol.registerClientbound(ClientboundPackets1_21_2.SET_CURSOR_ITEM, ClientboundPackets1_21.CONTAINER_SET_SLOT, wrapper -> {
             wrapper.write(Types.BYTE, (byte) -1); // Player inventory
-            wrapper.write(Types.VAR_INT, wrapper.user().get(InventoryStateIdStorage.class).stateId()); // State id; re-use the last known one
+            wrapper.write(Types.VAR_INT, wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().stateId()); // State id; re-use the last known one
             wrapper.write(Types.SHORT, (short) -1); // Cursor
             passthroughClientboundItem(wrapper);
         });
@@ -198,7 +199,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             final int containerType = wrapper.passthrough(Types.VAR_INT);
             if (containerType == 21) {
                 // Track smithing table to remove new data
-                wrapper.user().get(InventoryStateIdStorage.class).setSmithingTableOpen(true);
+                wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().setSmithingTableOpen(true);
             }
 
             protocol.getComponentRewriter().passthroughAndProcess(wrapper);
@@ -208,7 +209,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             varIntToUnsignedByte(wrapper);
 
             final int stateId = wrapper.passthrough(Types.VAR_INT);
-            wrapper.user().get(InventoryStateIdStorage.class).setStateId(stateId);
+            wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().setStateId(stateId);
 
             final Item[] items = wrapper.read(itemArrayType());
             wrapper.write(mappedItemArrayType(), items);
@@ -221,7 +222,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             varIntToByte(wrapper);
 
             final int stateId = wrapper.passthrough(Types.VAR_INT);
-            wrapper.user().get(InventoryStateIdStorage.class).setStateId(stateId);
+            wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().setStateId(stateId);
 
             wrapper.passthrough(Types.SHORT); // Slot id
             passthroughClientboundItem(wrapper);
@@ -229,20 +230,20 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
         protocol.registerClientbound(ClientboundPackets1_21_2.CONTAINER_SET_DATA, wrapper -> {
             varIntToUnsignedByte(wrapper);
 
-            if (wrapper.user().get(InventoryStateIdStorage.class).smithingTableOpen()) {
+            if (wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().smithingTableOpen()) {
                 // Cancel new data for smithing table
                 wrapper.cancel();
             }
         });
         protocol.registerClientbound(ClientboundPackets1_21_2.CONTAINER_CLOSE, wrapper -> {
             varIntToUnsignedByte(wrapper);
-            wrapper.user().get(InventoryStateIdStorage.class).setSmithingTableOpen(false);
+            wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().setSmithingTableOpen(false);
         });
         protocol.registerClientbound(ClientboundPackets1_21_2.SET_HELD_SLOT, ClientboundPackets1_21.SET_CARRIED_ITEM);
         protocol.registerClientbound(ClientboundPackets1_21_2.HORSE_SCREEN_OPEN, this::varIntToUnsignedByte);
         protocol.registerServerbound(ServerboundPackets1_20_5.CONTAINER_CLOSE, wrapper -> {
             byteToVarInt(wrapper);
-            wrapper.user().get(InventoryStateIdStorage.class).setSmithingTableOpen(false);
+            wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage().setSmithingTableOpen(false);
         });
         protocol.replaceServerbound(ServerboundPackets1_20_5.CONTAINER_CLICK, wrapper -> {
             byteToVarInt(wrapper);
@@ -269,7 +270,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             // Clearing the inventory via the destroy item slot is the only creative action old clients don't
             // apply locally, but 1.21.2+ servers do not send back the empty contents.
             // Detect the action by checking for linear slot clears and leave other actions alone.
-            final InventoryStateIdStorage storage = wrapper.user().get(InventoryStateIdStorage.class);
+            final InventoryStateIdStorage storage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).inventoryStateIdStorage();
             final boolean empty = Item.isEmpty(item);
             if (empty && slot == storage.nextClearedSlot()) {
                 if (slot == 45) {
@@ -328,7 +329,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
         });
 
         protocol.registerClientbound(ClientboundPackets1_21_2.RECIPE_BOOK_ADD, null, wrapper -> {
-            final RecipeStorage recipeStorage = wrapper.user().get(RecipeStorage.class);
+            final RecipeStorage recipeStorage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).recipeStorage();
             final int size = wrapper.read(Types.VAR_INT);
             for (int i = 0; i < size; i++) {
                 recipeStorage.readRecipe(wrapper);
@@ -343,12 +344,12 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
             wrapper.cancel();
         });
         protocol.registerClientbound(ClientboundPackets1_21_2.RECIPE_BOOK_REMOVE, ClientboundPackets1_21.RECIPE, wrapper -> {
-            final RecipeStorage recipeStorage = wrapper.user().get(RecipeStorage.class);
+            final RecipeStorage recipeStorage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).recipeStorage();
             final int[] ids = wrapper.read(Types.VAR_INT_ARRAY_PRIMITIVE);
             recipeStorage.lockRecipes(wrapper, ids);
         });
         protocol.registerClientbound(ClientboundPackets1_21_2.RECIPE_BOOK_SETTINGS, null, wrapper -> {
-            final RecipeStorage recipeStorage = wrapper.user().get(RecipeStorage.class);
+            final RecipeStorage recipeStorage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).recipeStorage();
             final boolean[] settings = new boolean[RecipeStorage.RECIPE_BOOK_SETTINGS];
             for (int i = 0; i < RecipeStorage.RECIPE_BOOK_SETTINGS; i++) {
                 settings[i] = wrapper.read(Types.BOOLEAN);
@@ -365,7 +366,7 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
                 wrapper.read(Types.VAR_INT_ARRAY_PRIMITIVE); // Items
             }
 
-            final RecipeStorage recipeStorage = wrapper.user().get(RecipeStorage.class);
+            final RecipeStorage recipeStorage = wrapper.user().<BackwardsStorables1_21_2>storables(protocol).recipeStorage();
             recipeStorage.readStoneCutterRecipes(wrapper);
 
             // Send later with the recipe book init
@@ -396,7 +397,8 @@ public final class BlockItemPacketRewriter1_21_2 extends BackwardsFullStructured
     }
 
     private void sendEmptyInventorySlots(final UserConnection connection) {
-        final int stateId = connection.get(InventoryStateIdStorage.class).stateId();
+        final BackwardsStorables1_21_2 storables = connection.storables(protocol);
+        final int stateId = storables.inventoryStateIdStorage().stateId();
         for (int slot = 1; slot <= 45; slot++) {
             final PacketWrapper setSlotPacket = PacketWrapper.create(ClientboundPackets1_21.CONTAINER_SET_SLOT, connection);
             setSlotPacket.write(Types.BYTE, (byte) 0); // Player inventory
