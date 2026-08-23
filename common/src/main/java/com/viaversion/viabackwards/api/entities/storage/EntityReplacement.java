@@ -79,7 +79,7 @@ public class EntityReplacement {
     }
 
     /**
-     * Returns the custom entity name. Can be either a {@link String,} {@link StringTag} or {@link com.viaversion.viaversion.libs.gson.JsonElement}.
+     * Returns the custom entity name. Can be either a {@link String}, {@link StringTag} or {@link com.viaversion.viaversion.libs.gson.JsonElement}.
      *
      * @return custom entity name
      */

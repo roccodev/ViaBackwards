@@ -18,7 +18,6 @@
 
 package com.viaversion.viabackwards.protocol.v1_13to1_12_2.storage;
 
-import com.viaversion.viaversion.api.connection.StorableObject;
 import com.viaversion.viaversion.api.minecraft.BlockPosition;
 import com.viaversion.viaversion.libs.fastutil.ints.IntOpenHashSet;
 import com.viaversion.viaversion.libs.fastutil.ints.IntSet;
@@ -26,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class BackwardsBlockStorage implements StorableObject {
+public class BackwardsBlockStorage {
     // This BlockStorage is very exclusive (;
     private static final IntSet WHITELIST = new IntOpenHashSet(779);
 
