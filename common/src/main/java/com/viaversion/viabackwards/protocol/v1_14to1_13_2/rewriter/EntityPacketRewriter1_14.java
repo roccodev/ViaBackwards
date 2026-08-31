@@ -484,7 +484,21 @@ public class EntityPacketRewriter1_14 extends LegacyEntityRewriter<ClientboundPa
 
         filter().type(EntityTypes1_14.CAT).handler((event, data) -> {
             if (event.index() == 15) {
-                data.setValue(1);
+                Integer catVariant = data.value();
+                int ocelotVariant = catVariant != null ? switch (catVariant) {
+                    // new ocelot mappings
+                    case 0, 1, 2, 3 -> catVariant;
+
+                    // Map to tuxedo
+                    case 10 -> 1; // all_black
+                    // Map to red
+                    case 5, 6 -> 2; // calico, persian
+                    // Map to siamese
+                    case 4, 7, 8, 9 -> 3; // british_shorthair, ragdoll, white, jellie
+
+                    default -> 0; // Untamed
+                } : 0;
+                data.setValue(ocelotVariant);
             } else if (event.index() == 13) {
                 data.setValue((byte) ((byte) data.getValue() & 0x4));
             }
