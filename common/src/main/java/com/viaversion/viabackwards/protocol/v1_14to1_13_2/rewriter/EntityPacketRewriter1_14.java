@@ -499,8 +499,6 @@ public class EntityPacketRewriter1_14 extends LegacyEntityRewriter<ClientboundPa
                     default -> 0; // Untamed
                 } : 0;
                 data.setValue(ocelotVariant);
-            } else if (event.index() == 13) {
-                data.setValue((byte) ((byte) data.getValue() & 0x4));
             }
         });
 
