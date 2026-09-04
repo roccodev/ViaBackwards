@@ -409,8 +409,16 @@ public final class EntityPacketRewriter1_19 extends EntityRewriter<ClientboundPa
             final TrackedEntity entity = tracker(event.user()).entity(event.entityId());
             final StoredPainting storedPainting = entity != null ? entity.get(StoredPainting.class) : null;
             if (storedPainting != null) {
-                final int type = data.value();
+                int type = data.value();
                 storedPainting.setType(type);
+                type = switch (type) {
+                    case 29 -> 25; // kong painting changed ID
+                    case 25 -> 19; // earth -> wither
+                    case 26 -> 16; // wind -> stage
+                    case 27 -> 18; // water -> skull_and_roses
+                    case 28 -> 14; // fire -> match
+                    default -> type;
+                };
 
                 final PacketWrapper packet = PacketWrapper.create(ClientboundPackets1_18.ADD_PAINTING, event.user());
                 packet.write(Types.VAR_INT, storedPainting.entityId());
